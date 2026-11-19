@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a2b6b807cf782c40b0eba96c86e7ce1, type: 3}
+  m_Name: Q 2
+  m_EditorClassIdentifier: Assembly-CSharp::businessQuestion
+  questionText: What's the goal of marketing a product?
+  answers:
+  - text: Make people aware of the products existence
+    isCorrect: 1
+  - text: "Make sure people don\u2019t buy too much of your product "
+    isCorrect: 0
+  - text: Make people think of your product as legitimate
+    isCorrect: 1
+  - text: Uhhh, I forgot
+    isCorrect: 0

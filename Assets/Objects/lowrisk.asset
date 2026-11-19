@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9f55645f802793b4858e1f4a9103b53, type: 3}
+  m_Name: lowrisk
+  m_EditorClassIdentifier: Assembly-CSharp::Doser
+  value: 20
+  delay: 0
+  duration: 90
+  curve:
+  - 0.1
+  - 0.2
+  - 0.3
+  - 0.5
+  - 0.8
+  - 1
+  - 0.8
+  - 0.5
+  - 0.3
+  - 0.2
+  - 0.1
+  uncertainty: 6
+  special: []
+  doserName: Low risk pill
+  description: 
