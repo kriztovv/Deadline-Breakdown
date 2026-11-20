@@ -1624,7 +1624,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: MATH
+  m_text: CHEMISTRY
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ec4748a03b36ce142abd3a00b01eb87a, type: 2}
   m_sharedMaterial: {fileID: -736198574135669141, guid: ec4748a03b36ce142abd3a00b01eb87a, type: 2}
@@ -5433,7 +5433,7 @@ GameObject:
   - component: {fileID: 779802046}
   - component: {fileID: 779802047}
   m_Layer: 0
-  m_Name: Math
+  m_Name: Chemistry
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5467,8 +5467,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8604855cce8e5548991c0d97face48b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SubjectCard
-  subjectId: Math
-  sceneName: '-'
+  subjectId: Chemistry
+  sceneName: mobliterator
   visuals: {fileID: 878424769}
   newAssignmentText: {fileID: 1006796768}
   assignmentName: {fileID: 1483129187}
@@ -9625,7 +9625,7 @@ MonoBehaviour:
   spawnInterval: 1
   minSpawnInterval: 0.2
   rampDuration: 120
-  hits: 0
+  perfect: 1
   maxTime: 20
   startTime: 20
   timerBar: {fileID: 0}
@@ -10575,7 +10575,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Equasioner
+  m_text: M-Obliterator
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ec4748a03b36ce142abd3a00b01eb87a, type: 2}
   m_sharedMaterial: {fileID: -736198574135669141, guid: ec4748a03b36ce142abd3a00b01eb87a, type: 2}

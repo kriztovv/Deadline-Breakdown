@@ -176,6 +176,7 @@ public class ClassroomInput : MonoBehaviour
                 minigameSpawner investScript = FindIn<minigameSpawner>(scene);
                 investScript.startInterval = (float)(0.4 - c / 10f);
                 FindIn<investit>(scene).requiredMoney = 10 +  c * 2;
+                investScript.StartGame();
                 break;
             case "dashingLad":
                 Debug.Log("Starting dashing lad. Completions: " + c);
