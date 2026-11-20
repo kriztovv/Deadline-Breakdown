@@ -13,6 +13,7 @@ public class AssignmentManager : MonoBehaviour
         { "Geography", "Marketing", "PE", "History", "IT", "Finance", "Art", "Math" };
     private float assignmentDuration = 180f;    // the 3:00 on the cards
     private float newAssignmentInterval = 60f;  // a new subject every minute //verity
+    //123
     
     [Header("Grades")]
     [SerializeField] private string[] gradeLetters = { "A", "B", "C", "D", "F" }; // best to worst
