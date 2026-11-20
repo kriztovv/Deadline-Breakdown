@@ -14,6 +14,7 @@ public class AssignmentManager : MonoBehaviour
     private float assignmentDuration = 180f;    // the 3:00 on the cards
     private float newAssignmentInterval = 60f;  // a new subject every minute //verity
     //verity 2
+    //123
     
     [Header("Grades")]
     [SerializeField] private string[] gradeLetters = { "A", "B", "C", "D", "F" }; // best to worst
