@@ -19,7 +19,7 @@ namespace EasyPeasyFirstPersonController
             ctx.targetCameraY = ctx.standingCameraHeight;
 
             bool isSprinting = ctx.input.sprint && ctx.input.moveInput.y > 0;
-            float speed = isSprinting ? ctx.sprintSpeed : ctx.walkSpeed;
+            float speed = isSprinting ? UpgradeManager.Get("walkSpeed", ctx.sprintSpeed) : UpgradeManager.Get("walkSpeed", ctx.walkSpeed);
 
             ctx.targetFov = isSprinting ? ctx.sprintFov : ctx.normalFov;
             ctx.currentBobIntensity = ctx.bobAmount * (isSprinting ? 1.5f : 1f);
