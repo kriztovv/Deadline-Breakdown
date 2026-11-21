@@ -11,6 +11,9 @@ public class doseController : MonoBehaviour
     [SerializeField] private EnergyEffectController effect;
     private Queue<int> _energyQueue;
 
+    private Coroutine _updateDoseCoroutine;
+    private Coroutine _updateSecondary;
+    
     //UI
     [SerializeField] private EnergyGraph graph;
     [SerializeField] private DeathSequence deathSequence;
@@ -29,7 +32,7 @@ public class doseController : MonoBehaviour
         _energyQueue.Enqueue(0);
         _energyQueue.Enqueue(0);
         _energyQueue.Enqueue(0);
-        StartCoroutine(UpdateDose());
+        _updateDoseCoroutine = StartCoroutine(UpdateDose());
         
         audioSource.clip = menuMusic;
         audioSource.loop = true;
@@ -44,8 +47,14 @@ public class doseController : MonoBehaviour
         activeDosers.Add(copy);
     }
 
-    private IEnumerator UpdateDose()
+    private IEnumerator UpdateDose(bool fromSecondary = false)
     {
+        if (fromSecondary)
+        {
+            _updateDoseCoroutine = _updateSecondary;
+            _updateSecondary = null;
+        }
+        
         while (doseMeter < 100)
         {
             doseMeter = 0;
@@ -69,6 +78,13 @@ public class doseController : MonoBehaviour
             graph.PushSample(100);
             effect.energy = 100;
             yield return new WaitForSecondsRealtime(1);
+        }
+
+        if (UpgradeManager.Instance != null && UpgradeManager.Instance.TryUseExtraLife())
+        {
+            SaveFromOverdose();
+            _updateSecondary = StartCoroutine(UpdateDose(true));
+            StopCoroutine(_updateDoseCoroutine);
         }
         
         Fail();

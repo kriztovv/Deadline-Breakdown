@@ -192,6 +192,11 @@ public class ClassroomInput : MonoBehaviour
                 artScript.roundsToWin = 3 + c;
                 artScript.StartGame();
                 break;
+            case "mobliterator":
+                Debug.Log("Starting mobliterator. Completions: " + c);
+                mobliterator chemScript = FindIn<mobliterator>(scene);
+                chemScript.StartGame();
+                break;
         }
         
     }
