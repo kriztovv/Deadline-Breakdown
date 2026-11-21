@@ -195,6 +195,7 @@ public class ClassroomInput : MonoBehaviour
                 minigameSpawner investScript = FindIn<minigameSpawner>(scene);
                 investScript.startInterval = (float)(0.4 - c / 10f);
                 FindIn<investit>(scene).requiredMoney = 10 +  c * 2;
+                investScript.StartGame();
                 break;
             case "dashingLad":
                 Debug.Log("Starting dashing lad. Completions: " + c);
@@ -209,6 +210,11 @@ public class ClassroomInput : MonoBehaviour
                 artScript.startPairs = 2 + c;
                 artScript.roundsToWin = 3 + c;
                 artScript.StartGame();
+                break;
+            case "mobliterator":
+                Debug.Log("Starting mobliterator. Completions: " + c);
+                mobliterator chemScript = FindIn<mobliterator>(scene);
+                chemScript.StartGame();
                 break;
         }
         

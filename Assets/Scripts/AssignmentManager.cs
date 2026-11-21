@@ -107,6 +107,18 @@ public class AssignmentManager : MonoBehaviour
             ActivateRandom();
             spawnTimer = Random.Range(5, 20);
         }
+
+        if (Input.anyKeyDown)
+        {
+            if (Input.GetKeyDown(KeyCode.Keypad0)) timers["Geography"] = 180f;
+            if (Input.GetKeyDown(KeyCode.Keypad1)) timers["Marketing"] = 180f;
+            if (Input.GetKeyDown(KeyCode.Keypad2)) timers["PE"] = 180f;
+            if (Input.GetKeyDown(KeyCode.Keypad3)) timers["History"] = 180f;
+            if (Input.GetKeyDown(KeyCode.Keypad4)) timers["IT"] = 180f;
+            if (Input.GetKeyDown(KeyCode.Keypad5)) timers["Finance"] = 180f;
+            if (Input.GetKeyDown(KeyCode.Keypad6)) timers["Art"] = 180f;
+            if (Input.GetKeyDown(KeyCode.Keypad7)) timers["Chemistry"] = 180f;
+        }
     }
     
     private void OnRespawned()

@@ -3021,7 +3021,7 @@ MonoBehaviour:
   - {fileID: 2001893362}
   xRange: {x: -8, y: 8}
   startInterval: 1
-  minInterval: 0.01
+  minInterval: 0.1
   rampDuration: 90
   maxObjects: 100
 --- !u!1 &1859488545
