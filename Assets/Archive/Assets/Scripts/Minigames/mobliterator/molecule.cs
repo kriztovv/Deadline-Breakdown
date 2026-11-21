@@ -25,17 +25,18 @@ public class molecule : MonoBehaviour
     private Rigidbody2D _rb;
 
     [Header("Shot (the molecule the player fires)")]
-    [SerializeField] private float steerSpeed = 3f;      // up/down speed while steering
     [SerializeField] private float settleTime = 2f;      // X: seconds after the first contact in which a same-colored contact pops it
     [SerializeField] private float maxFlightTime = 8f;   // a shot that hits nothing is removed after this
 
     public event System.Action<molecule> ShotFinished;   // popped, settle timer ran out, or flew away
+    public static event System.Action<molecule> AnyPopped;   // every pop, for the minigame's counter
+    public bool InMass => !_isShot || _shotState == ShotState.Settling;   // part of the mass: not waiting or flying
+    public bool IsWaiting => _shotState == ShotState.Waiting;   // still at the shoot point, not fired yet
 
     private enum ShotState { None, Waiting, Flying, Settling }
     private ShotState _shotState = ShotState.None;
     private bool _isShot;
     private Vector2 _shotVelocity;
-    private float _steer;
     
     private void Awake()
     {
@@ -89,6 +90,8 @@ public class molecule : MonoBehaviour
             }
         }
 
+        AnyPopped?.Invoke(this);
+        FinishShot();   // if this was the shot, mobliterator spawns the next one
         // ANIMATION: pop effect (particles, sound)
         Destroy(gameObject);
     }
@@ -103,8 +106,7 @@ public class molecule : MonoBehaviour
     {
         if (_shotState == ShotState.Flying)
         {
-            // straight line in the shot direction, W/S adds up/down speed on top
-            _rb.linearVelocity = _shotVelocity + Vector2.up * (_steer * steerSpeed);
+            _rb.linearVelocity = _shotVelocity;   // constant speed in a straight line, until the first contact
             return;
         }
 
@@ -135,9 +137,7 @@ public class molecule : MonoBehaviour
         _shotVelocity = direction.normalized * speed;
         StartCoroutine(FlightRoutine());
     }
-
-    public void Steer(float input) { _steer = Mathf.Clamp(input, -1f, 1f); }
-
+    
     private IEnumerator FlightRoutine()
     {
         yield return new WaitForSeconds(maxFlightTime);
@@ -177,6 +177,8 @@ public class molecule : MonoBehaviour
         if (_shotState == ShotState.Flying) BeginSettle();   // first contact
         if (_shotState == ShotState.Settling && SameColor(other)) Pop(false);   // no delay
     }
+    private void OnCollisionEnter2D(Collision2D c) { if (_isShot) ShotContact(c); }
+    private void OnCollisionStay2D(Collision2D c)  { if (_shotState == ShotState.Settling) ShotContact(c); }
     
     // mobliterator will call these later
     public void SetGravity(bool on) { gravityOn = on; }

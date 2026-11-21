@@ -214,6 +214,7 @@ public class ClassroomInput : MonoBehaviour
             case "mobliterator":
                 Debug.Log("Starting mobliterator. Completions: " + c);
                 mobliterator chemScript = FindIn<mobliterator>(scene);
+                chemScript.moleculeCount = 30 + 5 * c;
                 chemScript.StartGame();
                 break;
         }
