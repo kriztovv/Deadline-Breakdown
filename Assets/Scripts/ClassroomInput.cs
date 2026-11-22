@@ -217,6 +217,13 @@ public class ClassroomInput : MonoBehaviour
                 chemScript.moleculeCount = 30 + 5 * c;
                 chemScript.StartGame();
                 break;
+            case "geography":
+                Debug.Log("Starting geography. Completions: " + c);
+                geography geoScript = FindIn<geography>(scene);
+                geoScript.spawnDelay = (float)(1 - c * 0.05);
+                geoScript.projectileSpeed = (float)(4 + c * 0.2);
+                geoScript.StartGame();
+                break;
         }
         
     }

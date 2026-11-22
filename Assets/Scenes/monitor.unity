@@ -12048,7 +12048,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SubjectCard
   subjectId: Geography
-  sceneName: '-'
+  sceneName: geography
   visuals: {fileID: 1450587070}
   newAssignmentText: {fileID: 69235163}
   assignmentName: {fileID: 29330547}
