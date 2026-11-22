@@ -60,6 +60,7 @@ public class mainMenuCanLeftClick : MonoBehaviour
                 _sceneController.StartMinigame("monitor");
                 if (AssignmentManager.Instance != null) AssignmentManager.Instance.Begin();
                 if (GameStats.Instance != null) GameStats.Instance.Begin();
+                GameObject.Find("RoomActionManager").GetComponent<RoomActionManager>().StartActions();
                 break;
         }
     }
