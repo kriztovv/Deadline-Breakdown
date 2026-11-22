@@ -39,10 +39,12 @@ public class PillSpawner : MonoBehaviour
     private void Update()
     {
         activePills.RemoveAll(p => p == null);
+        
+        int cap = Mathf.RoundToInt(UpgradeManager.Get("maxPills", maxActivePills));
 
-        if (activePills.Count >= maxActivePills)
+        if (activePills.Count >= cap)
         {
-            ResetTimer(); // full: timer restarts once a pill is eaten
+            ResetTimer();
             return;
         }
 
@@ -55,6 +57,7 @@ public class PillSpawner : MonoBehaviour
             activePills.Add(Instantiate(prefab, point.position, point.rotation));
 
         ResetTimer();
+        
     }
 
     private GameObject PickPrefab()
@@ -72,10 +75,16 @@ public class PillSpawner : MonoBehaviour
             roll -= t.weight;
             if (roll <= 0f) return t.prefab;
         }
+        
         return null;
     }
 
-    private void ResetTimer() => timer = Random.Range(intervalRange.x, intervalRange.y);
+    private void ResetTimer()
+    {
+        float scale = Mathf.Max(0.1f, UpgradeManager.Get("pillInterval", 1f));   // 1 = normal, 0.8 = 20% faster
+        timer = Random.Range(intervalRange.x, intervalRange.y) * scale;
+        //Debug.Log($"[PillSpawner] next pill in {timer:F1}s (scale = {scale})");
+    }
 
     private Transform GetFreeSpawnPoint()
     {

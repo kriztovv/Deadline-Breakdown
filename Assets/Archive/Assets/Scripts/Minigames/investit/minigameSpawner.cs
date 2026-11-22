@@ -19,9 +19,10 @@ public class minigameSpawner : MonoBehaviour
     private float _startTime;
     private float _nextSpawn;
 
-    // Enabling the component (re)starts the speed-up, so disable and enable it to restart a round
-    private void OnEnable()
+    public void StartGame()
     {
+        if (startInterval < minInterval) startInterval = minInterval;
+        
         _startTime = Time.time;
         _nextSpawn = Time.time + startInterval;
     }

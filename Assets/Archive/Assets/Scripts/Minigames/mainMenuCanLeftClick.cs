@@ -61,6 +61,7 @@ public class mainMenuCanLeftClick : MonoBehaviour
                 if (AssignmentManager.Instance != null) AssignmentManager.Instance.Begin();
                 if (GameStats.Instance != null) GameStats.Instance.Begin();
                 GameObject.Find("RoomActionManager").GetComponent<RoomActionManager>().StartActions();
+                if (UpgradeManager.Instance != null) UpgradeManager.Instance.Begin();
                 break;
         }
     }

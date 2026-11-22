@@ -48,7 +48,7 @@ public class doseController : MonoBehaviour
 
     private IEnumerator UpdateDose()
     {
-        while (doseMeter < 100)
+        while (true)
         {
             doseMeter = 0;
             for (int i = activeDosers.Count - 1; i >= 0; i--)
@@ -62,18 +62,37 @@ public class doseController : MonoBehaviour
 
             float normalized = Mathf.Clamp01(Mathf.Min(doseMeter, 100) / 100f);
             Time.timeScale = 1f - Mathf.Lerp(0f, 0.5f, normalized);
-            
+
+            if (doseMeter >= 100)
+            {
+                if (UpgradeManager.Instance != null && UpgradeManager.Instance.TryUseExtraLife())
+                    StartCoroutine(SaveFromOverdose());      // a life was spent, so the player survives
+                else
+                    break;                   // no lives left, so it's a real overdose
+            }
+
             yield return new WaitForSecondsRealtime(1);
         }
-        
+
         for (int i = 0; i < 6; i++)
         {
             graph.PushSample(100);
             effect.energy = 100;
             yield return new WaitForSecondsRealtime(1);
         }
-        
+
         Fail();
+    }
+    
+    private IEnumerator SaveFromOverdose()
+    {
+        yield return new WaitForSecondsRealtime(1.25f);
+        // 1. every active pill effect off
+        foreach (Doser d in activeDosers) if (d != null) Destroy(d);   // the copies made in AddDoser
+        activeDosers.Clear();
+        doseMeter = 0;
+
+
     }
     
     private int CountDose(Doser doser)
@@ -108,6 +127,7 @@ public class doseController : MonoBehaviour
 
     public void Fail()
     {
+        
         Debug.Log("Game over");
         deathSequence.TriggerDeath();
 

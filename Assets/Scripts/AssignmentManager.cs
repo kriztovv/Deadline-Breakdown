@@ -10,11 +10,9 @@ public class AssignmentManager : MonoBehaviour
     public static AssignmentManager Instance { get; private set; }
 
     [SerializeField] private List<string> subjectIds = new List<string>
-        { "Geography", "Marketing", "PE", "History", "IT", "Finance", "Art", "Math" };
+        { "Geography", "Marketing", "PE", "History", "IT", "Finance", "Art", "Chemistry" };
     private float assignmentDuration = 180f;    // the 3:00 on the cards
-    private float newAssignmentInterval = 60f;  // a new subject every minute //verity
-    //verity 2
-    //123
+    private float newAssignmentInterval = 60f;  // a new subject every minute
     
     [Header("Grades")]
     [SerializeField] private string[] gradeLetters = { "A", "B", "C", "D", "F" }; // best to worst
@@ -108,6 +106,18 @@ public class AssignmentManager : MonoBehaviour
         {
             ActivateRandom();
             spawnTimer = Random.Range(5, 20);
+        }
+
+        if (Input.anyKeyDown)
+        {
+            if (Input.GetKeyDown(KeyCode.Keypad0)) timers["Geography"] = 180f;
+            if (Input.GetKeyDown(KeyCode.Keypad1)) timers["Marketing"] = 180f;
+            if (Input.GetKeyDown(KeyCode.Keypad2)) timers["PE"] = 180f;
+            if (Input.GetKeyDown(KeyCode.Keypad3)) timers["History"] = 180f;
+            if (Input.GetKeyDown(KeyCode.Keypad4)) timers["IT"] = 180f;
+            if (Input.GetKeyDown(KeyCode.Keypad5)) timers["Finance"] = 180f;
+            if (Input.GetKeyDown(KeyCode.Keypad6)) timers["Art"] = 180f;
+            if (Input.GetKeyDown(KeyCode.Keypad7)) timers["Chemistry"] = 180f;
         }
     }
     

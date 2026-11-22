@@ -19,6 +19,8 @@ public class ClassroomInput : MonoBehaviour
     private bool minigameOpen;
     private string openSubject;
     
+    private ClassroomClickable hoveredC, pressedC;
+    
     private CursorSkin cursorSkin;
     
     private string openScene;
@@ -90,6 +92,14 @@ public class ClassroomInput : MonoBehaviour
             if (MonitorInput.CursorOnScreen)
                 cursorObject.position = CursorWorld();
         }
+        
+        ClassroomClickable c = ClickableUnderCursor();
+        if (c != hoveredC)
+        {
+            if (hoveredC != null) hoveredC.SetHovered(false);
+            hoveredC = c;
+        }
+        if (hoveredC != null) hoveredC.SetHovered(hoveredC.Interactable);
 
         SubjectCard card = CardUnderCursor();
         if (card != hovered)
@@ -106,12 +116,12 @@ public class ClassroomInput : MonoBehaviour
     {
         if (cursorSkin == null) return;
 
-        bool overOpenable = hovered != null && hovered.CanOpen;
-        CursorSkin.Mode mode =
-            !overOpenable ? CursorSkin.Mode.Default :
-                (pressed == hovered ? CursorSkin.Mode.HandClick : CursorSkin.Mode.Hand);
+        bool overCard = hovered != null && hovered.CanOpen;
+        bool overBtn = hoveredC != null && hoveredC.Interactable;
+        bool down = (overCard && pressed == hovered) || (overBtn && pressedC == hoveredC);
 
-        cursorSkin.Set(mode);
+        cursorSkin.Set(!(overCard || overBtn) ? CursorSkin.Mode.Default
+            : down ? CursorSkin.Mode.HandClick : CursorSkin.Mode.Hand);
     }
 
     private void OnInteraction(MonitorInteraction i)
@@ -119,11 +129,20 @@ public class ClassroomInput : MonoBehaviour
         if (minigameOpen) return;
 
         if (i == MonitorInteraction.PrimaryDown)
+        {
             pressed = CardUnderCursor();
+            pressedC = ClickableUnderCursor();
+            
+        }
         else if (i == MonitorInteraction.PrimaryUp)
         {
             SubjectCard card = CardUnderCursor();
             if (card != null && card == pressed && card.CanOpen) Open(card);
+            
+            ClassroomClickable c = ClickableUnderCursor();
+            if (c != null && c == pressedC && c.Interactable) c.Click();
+            pressedC = null;
+            
             pressed = null;
         }
     }
@@ -176,6 +195,7 @@ public class ClassroomInput : MonoBehaviour
                 minigameSpawner investScript = FindIn<minigameSpawner>(scene);
                 investScript.startInterval = (float)(0.4 - c / 10f);
                 FindIn<investit>(scene).requiredMoney = 10 +  c * 2;
+                investScript.StartGame();
                 break;
             case "dashingLad":
                 Debug.Log("Starting dashing lad. Completions: " + c);
@@ -190,6 +210,19 @@ public class ClassroomInput : MonoBehaviour
                 artScript.startPairs = 2 + c;
                 artScript.roundsToWin = 3 + c;
                 artScript.StartGame();
+                break;
+            case "mobliterator":
+                Debug.Log("Starting mobliterator. Completions: " + c);
+                mobliterator chemScript = FindIn<mobliterator>(scene);
+                chemScript.moleculeCount = 30 + 5 * c;
+                chemScript.StartGame();
+                break;
+            case "geography":
+                Debug.Log("Starting geography. Completions: " + c);
+                geography geoScript = FindIn<geography>(scene);
+                geoScript.spawnDelay = (float)(1 - c * 0.05);
+                geoScript.projectileSpeed = (float)(4 + c * 0.2);
+                geoScript.StartGame();
                 break;
         }
         
@@ -247,5 +280,12 @@ public class ClassroomInput : MonoBehaviour
 
         if (wait > 0f) yield return new WaitForSecondsRealtime(wait);
         mgr.ResolvePendingFail();                          // the banner, if a subject reached F
+    }
+    
+    private ClassroomClickable ClickableUnderCursor()
+    {
+        if (!MonitorInput.CursorOnScreen) return null;
+        Collider2D col = classroomRoot.scene.GetPhysicsScene2D().OverlapPoint(CursorWorld());
+        return col != null ? col.GetComponentInParent<ClassroomClickable>() : null;
     }
 }
