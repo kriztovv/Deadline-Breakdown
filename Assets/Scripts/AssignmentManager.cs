@@ -10,7 +10,7 @@ public class AssignmentManager : MonoBehaviour
     public static AssignmentManager Instance { get; private set; }
 
     [SerializeField] private List<string> subjectIds = new List<string>
-        { "Geography", "Marketing", "PE", "History", "IT", "Finance", "Art", "Math" };
+        { "Geography", "Marketing", "PE", "History", "IT", "Finance", "Art", "Chemistry" };
     private float assignmentDuration = 180f;    // the 3:00 on the cards
     private float newAssignmentInterval = 60f;  // a new subject every minute
     

@@ -34,7 +34,7 @@ public class PillEater : MonoBehaviour
     {
         var sw = System.Diagnostics.Stopwatch.StartNew();
         action();
-        Debug.Log($"{label}: {sw.Elapsed.TotalMilliseconds:F1} ms");
+        //Debug.Log($"{label}: {sw.Elapsed.TotalMilliseconds:F1} ms");
     }
     
     private void Update()
@@ -45,8 +45,8 @@ public class PillEater : MonoBehaviour
         if (held == null || !held.TryGetComponent(out Pill pill)) return;
 
         // >>> call your friend's pill effect here <<<
-        Timed("effect",   () => effect.Trigger());
-        Timed("dose",     () => doseController.AddDoser(pill.doser));
+        effect.Trigger();
+        doseController.AddDoser(pill.doser);
 
         pickup.ForgetHeld();
         GameStats.Instance.AddPill();
@@ -58,11 +58,11 @@ public class PillEater : MonoBehaviour
                 _mainMenuScript = GameObject.Find("play").GetComponent<mainMenuCanLeftClick>();
             } catch (NullReferenceException){}
 
-        Timed("sfx",      () => SFXManager.instance.PlaySFX(eatSound, transform, 0.3f));
-        Timed("sfx",      () => SFXManager.instance.PlaySFX(gulpSound, transform, 1));
+        SFXManager.instance.PlaySFX(eatSound, transform, 0.3f);
+        SFXManager.instance.PlaySFX(gulpSound, transform, 1);
         if (!_start)
         {
-            Timed("tutorial", () => _mainMenuScript.TutAdvance());
+            _mainMenuScript.TutAdvance();
             Timed("music",    () => { loopSource.Stop(); loopSource.clip = startMusic; loopSource.Play(); });
             loopSource.volume = 0.2f;
             _start = true;
