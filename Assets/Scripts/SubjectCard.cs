@@ -34,6 +34,20 @@ public class SubjectCard : MonoBehaviour
     private Vector3 baseScale, basePos;
     private bool hovered, shown;
     
+    //more time perk
+    private Color timerBaseColor;
+    [SerializeField] private Color bonusTimerColor = new Color(0.3f, 0.9f, 0.4f);   // green
+    
+    //disable class perk
+    [Header("Disabled look")]
+    [SerializeField, Range(0.1f, 1f)] private float disabledBrightness = 0.45f;
+
+    private SpriteRenderer[] sprites;
+    private Color[] spriteColors;
+    private TMP_Text[] texts;
+    private Color[] textColors;
+    private bool greyed;
+    
     public float PlayGradeChange(int delta, string oldLetter, string newLetter)
     {
         StartCoroutine(GradeRoutine(delta, oldLetter, newLetter));
@@ -78,6 +92,20 @@ public class SubjectCard : MonoBehaviour
     {
         baseScale = visuals.localScale;
         basePos = visuals.localPosition;
+        timerBaseColor = timerText.color;      // add this line
+        
+        sprites = visuals.GetComponentsInChildren<SpriteRenderer>(true);
+        spriteColors = new Color[sprites.Length];
+        for (int i = 0; i < sprites.Length; i++) spriteColors[i] = sprites[i].color;
+
+        var list = new System.Collections.Generic.List<TMP_Text>(visuals.GetComponentsInChildren<TMP_Text>(true));
+        if (gradeText != null && !list.Contains(gradeText)) list.Add(gradeText);
+        list.Remove(deltaText);     // these two are animated or coloured by other code
+        list.Remove(timerText);
+        texts = list.ToArray();
+        textColors = new Color[texts.Length];
+        for (int i = 0; i < texts.Length; i++) textColors[i] = texts[i].color;
+        
         ApplyState(false);
     }
 
@@ -94,12 +122,15 @@ public class SubjectCard : MonoBehaviour
         }
         
         bool active = mgr != null && mgr.IsActive(subjectId);
+        SetGreyed(mgr != null && mgr.IsDisabled(subjectId) && !active);
+        
         if (active != shown) ApplyState(active);
 
         if (active)
         {
             int t = Mathf.CeilToInt(mgr.TimeLeft(subjectId));
             timerText.text = $"{t / 60}:{t % 60:00}";
+            timerText.color = mgr.IsBonus(subjectId) ? bonusTimerColor : timerBaseColor;   // add this line
             newAssignmentText.enabled = Mathf.Repeat(Time.unscaledTime, blinkInterval * 2f) < blinkInterval;
         }
 
@@ -117,4 +148,17 @@ public class SubjectCard : MonoBehaviour
     }
 
     public void SetHovered(bool value) => hovered = value;
+    
+    private void SetGreyed(bool on)
+    {
+        if (on == greyed) return;
+        greyed = on;
+
+        for (int i = 0; i < sprites.Length; i++)
+            sprites[i].color = on ? Dim(spriteColors[i]) : spriteColors[i];
+        for (int i = 0; i < texts.Length; i++)
+            texts[i].color = on ? Dim(textColors[i]) : textColors[i];
+    }
+
+    private Color Dim(Color c) => new Color(c.r * disabledBrightness, c.g * disabledBrightness, c.b * disabledBrightness, c.a);
 }

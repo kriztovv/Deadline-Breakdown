@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9f55645f802793b4858e1f4a9103b53, type: 3}
   m_Name: Highrisk
   m_EditorClassIdentifier: Assembly-CSharp::Doser
-  value: 70
+  value: 65
   delay: 0
   duration: 20
   curve:
@@ -21,5 +21,5 @@ MonoBehaviour:
   - 0.5
   uncertainty: 8
   special: []
-  doserName: Anti risk pill
+  doserName: High risk pill
   description: 

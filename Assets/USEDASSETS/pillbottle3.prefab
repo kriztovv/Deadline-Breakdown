@@ -137,6 +137,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1dca22df613b0ac47bf41d854bf3f7fb, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2972461866548529843}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1dca22df613b0ac47bf41d854bf3f7fb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -4465445425440501651}
   m_SourcePrefab: {fileID: 100100000, guid: 1dca22df613b0ac47bf41d854bf3f7fb, type: 3}
 --- !u!4 &5062905324124760078 stripped
 Transform:
@@ -638,3 +641,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pill
   doser: {fileID: 11400000, guid: acd7a4091cd3c423889b31225d2860a0, type: 2}
+--- !u!114 &-4465445425440501651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5550929798107476660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29a1672f35dc28749aae85041735cd65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OutlineBoost
+  boostedWidth: 4
+  boostedColor: {r: 1, g: 0, b: 0, a: 1}

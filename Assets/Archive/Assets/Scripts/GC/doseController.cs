@@ -42,6 +42,8 @@ public class doseController : MonoBehaviour
     public void AddDoser(Doser doser)
     {
         Doser copy = Instantiate(doser);
+        copy.value += Mathf.RoundToInt(UpgradeManager.Get("pillValue", 0f));       // perk: stronger pills
+        copy.duration += Mathf.RoundToInt(UpgradeManager.Get("pillDuration", 0f)); // keep this if you made the duration perk
         copy.SetQueue();
         activeDosers.Add(copy);
     }

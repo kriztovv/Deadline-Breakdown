@@ -30,7 +30,7 @@ public class PillRiskIndicator : MonoBehaviour
         Doser pill = heldPill.doser;
         if (pill == null) { if (log) Debug.Log("[Risk] pill.doser is null"); Hide(); return; }
 
-        float value = pill.value;
+        float value = pill.value + Mathf.RoundToInt(UpgradeManager.Get("pillValue", 0f));
         float uncertainty = pill.uncertainty;
         foreach (Doser d in dose.activeDosers)
         {

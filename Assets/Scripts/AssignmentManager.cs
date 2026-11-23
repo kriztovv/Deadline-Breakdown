@@ -34,6 +34,12 @@ public class AssignmentManager : MonoBehaviour
     public string GradeLetter(string id) => gradeLetters[GradeIndex(id)];
 
     private readonly Dictionary<string, int> queued = new Dictionary<string, int>();
+    
+    // upgrade where it adds more time
+    public string BonusSubject { get; private set; }
+    private float bonusSeconds;
+
+    public bool IsBonus(string id) => BonusSubject != null && id == BonusSubject;
 
 // the grade the player will have once the queued changes apply
     public int PendingIndex(string id) => queued.TryGetValue(id, out int q) ? q : GradeIndex(id);
@@ -50,6 +56,18 @@ public class AssignmentManager : MonoBehaviour
     [SerializeField] private GameObject workPrompt;
     [SerializeField] private GameObject crosshair;
     [SerializeField] private minigameInputController minigameInputController;
+    
+    
+    //perk where it disables a class
+    [Header("Class rotation perk")]
+    [SerializeField] private float rotateInterval = 60f;   // seconds before the disabled class changes
+
+    public string DisabledSubject { get; private set; }
+    private float rotateTimer;
+    
+    public bool IsDisabled(string id) => DisabledSubject != null && id == DisabledSubject;
+    
+    //end
 
     public static bool Dead { get; private set; }
     public bool Running { get; private set; }
@@ -88,6 +106,7 @@ public class AssignmentManager : MonoBehaviour
     private void Update()
     {
         if (!Running) return;
+        UpdateRotation();
         
         tempKeys.Clear();
         tempKeys.AddRange(timers.Keys);
@@ -105,7 +124,7 @@ public class AssignmentManager : MonoBehaviour
         if (spawnTimer <= 0f)
         {
             ActivateRandom();
-            spawnTimer = Random.Range(5, 20);
+            spawnTimer = Random.Range(5, 20) + UpgradeManager.Get("assignmentGap", 0f);   // perk adds seconds
         }
 
         if (Input.anyKeyDown)
@@ -191,15 +210,62 @@ public class AssignmentManager : MonoBehaviour
 
     private void ActivateRandom()
     {
+        // how many assignments may run at once: all subjects, minus whatever perks take off
+        int max = Mathf.Max(1, Mathf.RoundToInt(UpgradeManager.Get("maxAssignments", subjectIds.Count)));
+        if (timers.Count >= max) return;
+        
         var candidates = new List<string>();
         foreach (string id in subjectIds)
-            if (!timers.ContainsKey(id)) candidates.Add(id);
+            if (!timers.ContainsKey(id) && !IsDisabled(id)) candidates.Add(id);
 
-        if (candidates.Count == 0) return; // everything already has an assignment
+        if (candidates.Count == 0) return;
 
-        assignmentDuration = Random.Range(30, 120);
-        
-        timers[candidates[Random.Range(0, candidates.Count)]] = assignmentDuration;
+        string pick = candidates[Random.Range(0, candidates.Count)];
+
+        float duration = Random.Range(30, 120);
+        if (IsBonus(pick)) duration += bonusSeconds;   // the perk's subject gets extra time
+
+        timers[pick] = duration;
+    }
+    
+    // called by the perk when it's picked
+    public void PickBonusSubject(float seconds)
+    {
+        bonusSeconds = seconds;
+        BonusSubject = subjectIds[Random.Range(0, subjectIds.Count)];
+
+        if (timers.ContainsKey(BonusSubject))        // already running, so top it up now
+            timers[BonusSubject] += seconds;
+    }
+    
+    private void UpdateRotation()
+    {
+        // perk not owned yet: nothing is disabled
+        if (UpgradeManager.Get("classRotation", 0f) < 1f) { DisabledSubject = null; rotateTimer = 0f; return; }
+
+        if (DisabledSubject == null) { RotateDisabled(); return; }   // first pick right after the perk
+
+        rotateTimer += Time.unscaledDeltaTime;
+        if (rotateTimer >= rotateInterval) RotateDisabled();
+    }
+
+    private readonly List<string> _eligible = new List<string>();
+    private void RotateDisabled()
+    {
+        _eligible.Clear();
+        foreach (string id in subjectIds)
+            if (!timers.ContainsKey(id) && id != DisabledSubject)   // idle, and not the one already disabled
+                _eligible.Add(id);
+
+        if (_eligible.Count == 0)
+        {
+            // every other class is busy, so keep the current one and try again in about a second
+            rotateTimer = Mathf.Max(0f, rotateInterval - 1f);
+            return;
+        }
+
+        rotateTimer = 0f;
+        DisabledSubject = _eligible[Random.Range(0, _eligible.Count)];
     }
     
     public void ResolvePendingFail()
