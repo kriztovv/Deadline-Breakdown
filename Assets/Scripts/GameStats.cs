@@ -57,6 +57,22 @@ public class GameStats : MonoBehaviour
 
     public int TotalPlays { get { int t = 0; foreach (var p in plays) t += p.Value; return t; } }
     public int TotalCompletions { get { int t = 0; foreach (var p in completions) t += p.Value; return t; } }
+    
+    //highscore
+    private const string HighScoreKey = "highscore_v1";   // bump to v2 if you ever rebalance the score
+
+    public int HighScore => PlayerPrefs.GetInt(HighScoreKey, 0);
+    
+    // saves the current score if it beats the record; returns true when it's a new best
+    public bool CommitHighScore()
+    {
+        int current = Mathf.RoundToInt(Score);
+        if (current <= HighScore) return false;
+
+        PlayerPrefs.SetInt(HighScoreKey, current);
+        PlayerPrefs.Save();
+        return true;
+    }
 
 // survival + completions + pills (diminishing) + grades
     public float Score

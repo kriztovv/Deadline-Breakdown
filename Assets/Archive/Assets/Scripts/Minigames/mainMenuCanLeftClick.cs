@@ -57,6 +57,7 @@ public class mainMenuCanLeftClick : MonoBehaviour
             case 1:
                 _tutState = 2;
                 StopCoroutine(Wait());
+                _sceneController.CloseMainMenu();
                 _sceneController.StartMinigame("monitor");
                 if (AssignmentManager.Instance != null) AssignmentManager.Instance.Begin();
                 if (GameStats.Instance != null) GameStats.Instance.Begin();

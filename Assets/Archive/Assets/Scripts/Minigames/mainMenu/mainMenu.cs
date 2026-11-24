@@ -7,6 +7,14 @@ public class mainMenu : minigameController
     private bool _wasHeld;
     private float _pausedUntil;
     private Rigidbody2D _rb;
+    
+    private sceneController sceneController;
+
+    public void Awake()
+    {
+        sceneController = FindFirstObjectByType<sceneController>();
+        sceneController.StartMinigame("RoomVisual");
+    }
 
     protected override void MgStart()
     {
