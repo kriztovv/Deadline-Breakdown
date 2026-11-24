@@ -29,5 +29,6 @@ MonoBehaviour:
   - 0.1
   uncertainty: 7
   special: []
+  icon: {fileID: 21300000, guid: 331c73b81a63cbe45b7fc5b4287c3a21, type: 3}
   doserName: Low risk pill
   description: 
