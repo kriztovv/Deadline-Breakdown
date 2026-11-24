@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -25,13 +23,8 @@ public class RoomActionManager : MonoBehaviour
     [Header("Actions (can also self-register at runtime)")]
     [SerializeField] List<RoomAction> actions = new List<RoomAction>();
 
-    [Header("Notification UI")]
-    [SerializeField] RectTransform notificationPanel;  // the "notification" root object
-    [SerializeField] TMP_Text titleText;               // "title" child
-    [SerializeField] TMP_Text descriptionText;         // "desctiption" child
-    [SerializeField] float slideDuration = 0.35f;
-    [Tooltip("How far left (in canvas units) the panel hides. Must clear the screen edge.")]
-    [SerializeField] float slideDistance = 700f;
+    [Header("Notification look")]
+    [SerializeField] NotificationItem notificationPrefab;   // the RoomActionNotification prefab
 
     // UI and other systems listen to these
     public event Action<RoomAction> ActionStarted;
@@ -39,6 +32,7 @@ public class RoomActionManager : MonoBehaviour
 
     readonly Dictionary<RoomAction, float> activeTimers = new Dictionary<RoomAction, float>();
     readonly Dictionary<RoomAction, float> lastEndTime = new Dictionary<RoomAction, float>();
+    readonly Dictionary<RoomAction, NotificationItem> notifications = new Dictionary<RoomAction, NotificationItem>();
     readonly List<RoomAction> candidates = new List<RoomAction>();   // reused, avoids allocations
     readonly List<RoomAction> timeoutBuffer = new List<RoomAction>(); // reused
 
@@ -60,8 +54,6 @@ public class RoomActionManager : MonoBehaviour
         // Hook up anything assigned in the Inspector
         foreach (var a in actions)
             Subscribe(a);
-
-        InitNotification();
     }
 
     void OnDestroy()
@@ -97,13 +89,7 @@ public class RoomActionManager : MonoBehaviour
 
             a.Cancel();
             activeTimers.Remove(a);
-        }
-
-        // Slide the notification away unless FinishAction is about to do it
-        if (displayed != null && !activeTimers.ContainsKey(displayed))
-        {
-            displayed = null;
-            if (notificationPanel != null) SlideTo(hiddenPos);
+            DismissNotification(a);
         }
     }
 
@@ -136,7 +122,7 @@ public class RoomActionManager : MonoBehaviour
             activeTimers.Remove(action);
         Unsubscribe(action);
         actions.Remove(action);
-        ShowNextOrHide(action); // don't leave the notification stuck on a removed action
+        DismissNotification(action); // don't leave a notification stuck for a removed action
     }
 
     void Subscribe(RoomAction a)
@@ -201,7 +187,7 @@ public class RoomActionManager : MonoBehaviour
 
         activeTimers[action] = action.TimeLimit; // 0 = no limit
         action.Begin();
-        ShowNotification(action);
+        PushNotification(action);
         ActionStarted?.Invoke(action);
     }
 
@@ -247,80 +233,25 @@ public class RoomActionManager : MonoBehaviour
         if (!activeTimers.Remove(a)) return; // wasn't started by us
 
         lastEndTime[a] = Time.time;
-        ShowNextOrHide(a);
+        DismissNotification(a);
         ActionEnded?.Invoke(a, success);
     }
 
-    // ---------- Notification UI ----------
+    // ---------- Notifications (all UI work lives in NotificationManager) ----------
 
-    RoomAction displayed;   // action currently shown on the notification
-    Vector2 shownPos;
-    Vector2 hiddenPos;
-    Coroutine slideRoutine;
-
-    void InitNotification()
+    void PushNotification(RoomAction action)
     {
-        if (notificationPanel == null) return;
+        if (NotificationManager.Instance == null) return;
 
-        // The position it has in the editor is the "shown" position
-        shownPos = notificationPanel.anchoredPosition;
-        hiddenPos = shownPos + Vector2.left * slideDistance;
-        notificationPanel.anchoredPosition = hiddenPos; // start hidden off to the left
+        notifications[action] = NotificationManager.Instance.Push(notificationPrefab, action.Title, action.Description);
     }
 
-    void ShowNotification(RoomAction action)
+    void DismissNotification(RoomAction action)
     {
-        if (notificationPanel == null) return;
-        if (displayed != null) return; // already showing one; this one takes over when that ends
+        if (!notifications.Remove(action, out var item)) return;
 
-        displayed = action;
-        ApplyText(action);
-        SlideTo(shownPos);
-    }
-
-    void ShowNextOrHide(RoomAction ended)
-    {
-        if (notificationPanel == null || displayed != ended) return;
-
-        displayed = null;
-
-        // Another action still active? Swap the text and keep the panel out.
-        foreach (var other in activeTimers.Keys)
-        {
-            displayed = other;
-            ApplyText(other);
-            return;
-        }
-
-        SlideTo(hiddenPos);
-    }
-
-    void ApplyText(RoomAction action)
-    {
-        if (titleText != null) titleText.text = action.Title;
-        if (descriptionText != null) descriptionText.text = action.Description;
-    }
-
-    void SlideTo(Vector2 target)
-    {
-        if (slideRoutine != null) StopCoroutine(slideRoutine);
-        slideRoutine = StartCoroutine(SlideRoutine(target));
-    }
-
-    IEnumerator SlideRoutine(Vector2 target)
-    {
-        Vector2 start = notificationPanel.anchoredPosition; // continues smoothly if interrupted
-        float t = 0f;
-
-        while (t < 1f)
-        {
-            t += Time.unscaledDeltaTime / Mathf.Max(0.01f, slideDuration); // unscaled: still slides if the game is paused
-            notificationPanel.anchoredPosition = Vector2.Lerp(start, target, Mathf.SmoothStep(0f, 1f, t));
-            yield return null;
-        }
-
-        notificationPanel.anchoredPosition = target;
-        slideRoutine = null;
+        if (NotificationManager.Instance != null)
+            NotificationManager.Instance.Dismiss(item);
     }
 
     void ScheduleNext()
