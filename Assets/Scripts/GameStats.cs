@@ -6,9 +6,6 @@ public class GameStats : MonoBehaviour
 {
     public static GameStats Instance { get; private set; }
 
-    [Tooltip("Score uses max(1, value) for pills and completions, so a single 0 doesn't wipe out the whole score.")]
-    [SerializeField] private bool countZeroAsOne = true;
-
     public event Action Changed;   // UI can subscribe and refresh
 
     private readonly Dictionary<string, int> plays = new Dictionary<string, int>();
@@ -21,6 +18,14 @@ public class GameStats : MonoBehaviour
     private void Awake() => Instance = this;
     private void OnEnable() => DeathSequence.Respawned += ResetRun;
     private void OnDisable() => DeathSequence.Respawned -= ResetRun;
+    
+    
+    [Header("Score weights")]
+    [SerializeField] private float pointsPerMinute = 100f;      // survival, linear
+    [SerializeField] private float pointsPerCompletion = 250f;  // each finished minigame, linear
+    [SerializeField] private float pillWeight = 60f;            // scaled by sqrt(pills), so it slows down
+    [SerializeField] private float pointsPerGradeStep = 40f;    // optional bonus for good grades
+    [SerializeField] private int worstGradeIndex = 4;           // F in your A, B, C, D, F list
 
     private void Update()
     {
@@ -53,15 +58,30 @@ public class GameStats : MonoBehaviour
     public int TotalPlays { get { int t = 0; foreach (var p in plays) t += p.Value; return t; } }
     public int TotalCompletions { get { int t = 0; foreach (var p in completions) t += p.Value; return t; } }
 
-    // time survived * pills taken * minigames finished
+// survival + completions + pills (diminishing) + grades
     public float Score
     {
         get
         {
-            float pills = PillsTaken, done = TotalCompletions;
-            if (countZeroAsOne) { pills = Mathf.Max(1f, pills); done = Mathf.Max(1f, done); }
-            return TimeSurvived * pills * done;
+            float survival    = TimeSurvived / 60f * pointsPerMinute;
+            float completed   = TotalCompletions * pointsPerCompletion;
+            float pillsPart   = Mathf.Sqrt(PillsTaken) * pillWeight;
+            float gradesPart  = GradePoints() * pointsPerGradeStep;
+
+            return survival + completed + pillsPart + gradesPart;
         }
+    }
+    
+    // how many grade steps above F you hold across all subjects (A = 4, F = 0, per subject)
+    private int GradePoints()
+    {
+        var am = AssignmentManager.Instance;
+        if (am == null) return 0;
+
+        int points = 0;
+        foreach (string id in am.SubjectIds)
+            points += Mathf.Max(0, worstGradeIndex - am.GradeIndex(id));
+        return points;
     }
 
     public void ResetRun()
