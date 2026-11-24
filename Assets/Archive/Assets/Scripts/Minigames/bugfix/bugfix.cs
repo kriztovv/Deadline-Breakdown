@@ -11,6 +11,17 @@ public class bugfix : minigameController
     [SerializeField] private float minSpawnInterval = 0.8f;   // the fastest it ever gets
     [SerializeField] private float rampDuration = 120f;       // seconds until the minimum is reached
 
+    [Header("Tutorial")]
+    public bool tutorial;                                // set to true before StartGame() to play the tutorial first
+    [SerializeField] private GameObject gameRoot;        // the "game" object, disabled during the tutorial
+    [SerializeField] private GameObject tutorialRoot;    // the "tutorial" object, enabled during the tutorial
+    [SerializeField] private int tutorialBugsRequired = 4;
+
+    private bool _running;   // the real game is going
+    private bool _inTutorial;
+    private int _tutorialEliminated;
+    private bool _barReady;
+    
     private readonly List<GameObject> _bugs = new List<GameObject>();
     private float _startTime;
     private float _nextSpawn;
@@ -29,13 +40,47 @@ public class bugfix : minigameController
     [SerializeField] private Transform timerBar;
     private float timeLeft;
 
-    protected override void MgStart()
+    public void StartGame()
     {
-        _startTime = Time.time;
         _finished = false;
+        _running = false;
+
+        if (tutorial)
+        {
+            _inTutorial = true;
+            _tutorialEliminated = 0;
+            SetActiveSafe(gameRoot, false);
+            SetActiveSafe(tutorialRoot, true);
+            // ANIMATION: tutorial intro
+        }
+        else BeginGame();
+    }
+
+    private void BeginGame()   // the real game: runs right away, or after the tutorial
+    {
+        _inTutorial = false;
+        SetActiveSafe(tutorialRoot, false);
+        SetActiveSafe(gameRoot, true);
+
+        _startTime = Time.time;
+        _nextSpawn = 0f;
+        _eliminated = 0;
         timeLeft = Mathf.Min(startTime, maxTime);
         InitBar();
         UpdateBar();
+        _running = true;
+    }
+    
+    // Never disables an object this script lives under, that would switch the minigame off
+    private void SetActiveSafe(GameObject go, bool active)
+    {
+        if (go == null) return;
+        if (!active && transform.IsChildOf(go.transform))
+        {
+            Debug.LogWarning("bugfix: this script is inside " + go.name + ", so it can't be disabled. Move the script outside it.", this);
+            return;
+        }
+        go.SetActive(active);
     }
 
     protected override void MgOnEnable()  => bugRightclick.Eliminated += OnBugEliminated;
@@ -43,6 +88,13 @@ public class bugfix : minigameController
 
     private void OnBugEliminated(bugRightclick bug)
     {
+        if (_inTutorial)
+        {
+            _tutorialEliminated++;
+            if (_tutorialEliminated >= tutorialBugsRequired) BeginGame();
+            return;   // the tutorial bugs don't count for the real game
+        }
+
         _eliminated++;
         Debug.Log($"Bugs eliminated: {_eliminated}");
     }
@@ -61,10 +113,10 @@ public class bugfix : minigameController
 
     protected override void MgUpdate()
     {
-        if (_finished) return;
+        if (!_running || _finished) return;
 
         // countdown
-        timeLeft -= Time.deltaTime;
+        timeLeft -= Time.unscaledDeltaTime;   // real time, ignores timeScale
         UpdateBar();
 
         if (timeLeft <= 0f)
@@ -102,7 +154,8 @@ public class bugfix : minigameController
 
     private void InitBar()
     {
-        if (timerBar == null) return;
+        if (timerBar == null || _barReady) return;
+        _barReady = true;
 
         _barFullScale = timerBar.localScale;
 

@@ -180,6 +180,7 @@ public class ClassroomInput : MonoBehaviour
             case "bugfixing":
                 Debug.Log("Starting bugfixing. Completions: " + c);
                 bugfix bugfixScript = FindIn<bugfix>(scene);
+                if (c == 0) bugfixScript.tutorial = true; 
                 bugfixScript.spawnInterval = (float)(0.4 - c * 0.05);
                 bugfixScript.maxBugs = 10 + c * 2;
                 break;
