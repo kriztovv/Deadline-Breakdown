@@ -4119,6 +4119,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1646747380}
+  - {fileID: 1212061953}
   - {fileID: 1880050135}
   - {fileID: 482681575}
   - {fileID: 1360856047}
@@ -5526,8 +5528,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1212061952}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 979.4346, y: 0.00005, z: 17349.533}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -20.56543, y: -999.99994, z: 17349.533}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5535,7 +5537,7 @@ Transform:
   - {fileID: 1779561888}
   - {fileID: 559429839}
   - {fileID: 1609174931}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 667616085}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1290913206
 GameObject:
@@ -9119,8 +9121,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1646747379}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 979.4346, y: 0.00005, z: 17349.533}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -20.56543, y: -999.99994, z: 17349.533}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9130,7 +9132,7 @@ Transform:
   - {fileID: 67271188}
   - {fileID: 987913126}
   - {fileID: 26991535}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 667616085}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1681098931
 GameObject:
@@ -9636,7 +9638,7 @@ MonoBehaviour:
   spawnInterval: 1
   minSpawnInterval: 0.05
   rampDuration: 120
-  tutorial: 0
+  tutorial: 1
   gameRoot: {fileID: 1212061952}
   tutorialRoot: {fileID: 1646747379}
   tutorialBugsRequired: 4
@@ -10673,5 +10675,3 @@ SceneRoots:
   - {fileID: 667616085}
   - {fileID: 1896644373}
   - {fileID: 1172870614}
-  - {fileID: 1646747380}
-  - {fileID: 1212061953}

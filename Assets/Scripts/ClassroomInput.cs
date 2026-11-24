@@ -183,6 +183,7 @@ public class ClassroomInput : MonoBehaviour
                 if (c == 0) bugfixScript.tutorial = true; 
                 bugfixScript.spawnInterval = (float)(0.4 - c * 0.05);
                 bugfixScript.maxBugs = 10 + c * 2;
+                bugfixScript.StartGame();
                 break;
             case "pressBombardment":
                 Debug.Log("Starting press bombardment. Completions: " + c);
