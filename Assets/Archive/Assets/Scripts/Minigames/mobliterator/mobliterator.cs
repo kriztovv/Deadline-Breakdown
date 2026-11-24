@@ -30,13 +30,14 @@ public class mobliterator : minigameController
     [SerializeField] private float secondsPerMolecule = 3f;  // total time = required pops * this
     [SerializeField] private Transform timerBar;             // scaled horizontally, runs out over the total time, its left edge stays in place
     [SerializeField] private float endDelay = 1.5f;          // real seconds between the end and closing the minigame
+    public bool tutorial;
 
     private readonly List<GameObject> _spawned = new List<GameObject>();
     private molecule _shot;        // the molecule that is waiting or flying
     private Coroutine _respawn;
     private float _aimAngle;       // degrees above (+) or below (-) the horizontal
 
-    private int _popped, _required;
+    private int _popped, _required, _maxRequired;
     private float _gameTime, _elapsed;
     private bool _running, _ended;
 
@@ -81,7 +82,9 @@ public class mobliterator : minigameController
         // goal and timer
         _popped = 0;
         _required = moleculeCount / 3;
-        _gameTime = _required * secondsPerMolecule;
+        _maxRequired = moleculeCount / 2;
+        Debug.Log(_required + "/" + _maxRequired);
+        _gameTime = tutorial ? 0 : _required * secondsPerMolecule;
         _elapsed = 0f;
         _ended = false;
         _running = true;
@@ -140,8 +143,6 @@ public class mobliterator : minigameController
     // Counting
     private void OnMoleculePopped(molecule m)
     {
-        if (!_running || m.transform.parent != transform) return;   // only this minigame's molecules
-
         _popped++;
         UpdateCounter();
         StartCoroutine(CheckAllPopped());
@@ -158,31 +159,42 @@ public class mobliterator : minigameController
             if (m.InMass) yield break;   // something is still in the mass, or about to pop
         }
 
-        EndGame(true);
+        StartCoroutine(EndGame(true));
     }
 
     private void UpdateCounter()
     {
-        if (counterText != null) counterText.text = _popped + "/" + _required;
+        counterText.text = _popped.ToString();
+        if (_popped < _required)
+        {
+            counterText.color = Color.red;
+        } else if (_popped >= _required && _popped < _maxRequired)
+        {
+            counterText.color = Color.yellow;
+        }
+        else if (_popped >= _maxRequired)
+        {
+            counterText.color = Color.green;
+        }
     }
 
     // End
-    private void EndGame(bool poppedAll)
+    private IEnumerator EndGame(bool poppedEnough)
     {
-        if (_ended) return;
-        _ended = true;
-        _running = false;
-        if (_respawn != null) { StopCoroutine(_respawn); _respawn = null; }
+        if (!_ended)
+        {
+            _ended = true;
+            _running = false;
+            if (_respawn != null) { StopCoroutine(_respawn); _respawn = null; }
+            yield return new WaitForSecondsRealtime(endDelay);
+            Debug.Log($"mobliterator: popped {_popped}/{_required}, all popped: {poppedEnough}");
+            if (_popped < _required) Grade(false);
+            else if (_popped <= _maxRequired) Grade(true);
+            // else: the required number was reached but not everything popped, the grade stays
+            ClassroomInput.Instance.CloseMinigame(true);
+        }
 
-        Debug.Log($"mobliterator: popped {_popped}/{_required}, all popped: {poppedAll}");
-
-        if (poppedAll) Grade(true);
-        else if (_popped < _required) Grade(false);
-        else if (_popped <= moleculeCount / 2) Grade(true);
-        
-        // else: the required number was reached but not everything popped, the grade stays
-
-        StartCoroutine(CloseRoutine());
+        yield return null;
     }
 
     private void Grade(bool improve)
@@ -197,13 +209,6 @@ public class mobliterator : minigameController
         else AssignmentManager.Instance.Worsen(assignmentName);
     }
 
-    private IEnumerator CloseRoutine()
-    {
-        // ANIMATION: end feedback (success or failure) while the game waits to close
-        yield return new WaitForSecondsRealtime(endDelay);
-        ClassroomInput.Instance.CloseMinigame(true);
-    }
-
     // The aimed direction: W/S tilt it up or down from the horizontal
     private Vector2 AimDirection()
     {
@@ -214,11 +219,11 @@ public class mobliterator : minigameController
     protected override void MgUpdate()
     {
         // Timer
-        if (_running)
+        if (_running && !tutorial)
         {
             _elapsed += Time.deltaTime;   // the world clock, follows timeScale like the other timers
             UpdateBar();
-            if (_elapsed >= _gameTime) EndGame(false);
+            if (_elapsed >= _gameTime) StartCoroutine(EndGame(false));
         }
 
         // Aim
@@ -241,6 +246,11 @@ public class mobliterator : minigameController
                 aimIndicator.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
                 // ANIMATION: the arrow or trajectory line can pulse or stretch here
             }
+        }
+
+        if (_running && _popped >= _maxRequired)
+        {
+            StartCoroutine(EndGame(true));
         }
     }
 

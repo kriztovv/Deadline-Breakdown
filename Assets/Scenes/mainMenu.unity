@@ -176,7 +176,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: <color=#87ceeb>Izitao</color> - worked on the game
+  m_text: <color=#87ceeb>Izitao</color> - 3D, Programmer
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ec4748a03b36ce142abd3a00b01eb87a, type: 2}
   m_sharedMaterial: {fileID: -736198574135669141, guid: ec4748a03b36ce142abd3a00b01eb87a, type: 2}
@@ -4522,7 +4522,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: <color=yellow>Kriztov</color> - helped a lot
+  m_text: <color=yellow>Kriztov</color> - 2D art, Programmer
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ec4748a03b36ce142abd3a00b01eb87a, type: 2}
   m_sharedMaterial: {fileID: -736198574135669141, guid: ec4748a03b36ce142abd3a00b01eb87a, type: 2}
@@ -5460,7 +5460,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: <color=#fc03df>casual_npc</color> - did some work
+  m_text: <color=#fc03df>casual_npc</color> - Programmer
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ec4748a03b36ce142abd3a00b01eb87a, type: 2}
   m_sharedMaterial: {fileID: -736198574135669141, guid: ec4748a03b36ce142abd3a00b01eb87a, type: 2}

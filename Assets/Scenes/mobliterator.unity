@@ -2202,6 +2202,7 @@ MonoBehaviour:
   secondsPerMolecule: 1
   timerBar: {fileID: 563438937}
   endDelay: 1.5
+  tutorial: 0
 --- !u!58 &763165350
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -3153,8 +3154,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 6.85, y: 3.92}
-  m_SizeDelta: {x: 3.793, y: 1.4273}
+  m_AnchoredPosition: {x: 7.78, y: 3.92}
+  m_SizeDelta: {x: 2, y: 1.4273}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1259316958
 MonoBehaviour:

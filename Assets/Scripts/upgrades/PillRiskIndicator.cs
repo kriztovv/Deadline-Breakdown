@@ -22,13 +22,13 @@ public class PillRiskIndicator : MonoBehaviour
         if (log) _nextLog = Time.unscaledTime + 1f;
 
         float sense = UpgradeManager.Get("riskSense", 0f);
-        if (sense < 1f) { if (log) Debug.Log($"[Risk] perk not owned, riskSense = {sense}"); Hide(); return; }
+        if (sense < 1f) { if (log) Hide(); return; }
 
         Rigidbody held = pickup.Held;
-        if (held == null || !held.TryGetComponent(out Pill heldPill)) { if (log) Debug.Log("[Risk] nothing held / not a Pill"); Hide(); return; }
+        if (held == null || !held.TryGetComponent(out Pill heldPill)) { if (log)  Hide(); return; }
 
         Doser pill = heldPill.doser;
-        if (pill == null) { if (log) Debug.Log("[Risk] pill.doser is null"); Hide(); return; }
+        if (pill == null) { if (log) Hide(); return; }
 
         float value = pill.value + Mathf.RoundToInt(UpgradeManager.Get("pillValue", 0f));
         float uncertainty = pill.uncertainty;

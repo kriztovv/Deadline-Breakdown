@@ -180,8 +180,10 @@ public class ClassroomInput : MonoBehaviour
             case "bugfixing":
                 Debug.Log("Starting bugfixing. Completions: " + c);
                 bugfix bugfixScript = FindIn<bugfix>(scene);
+                if (c == 0) bugfixScript.tutorial = true; 
                 bugfixScript.spawnInterval = (float)(0.4 - c * 0.05);
                 bugfixScript.maxBugs = 10 + c * 2;
+                bugfixScript.StartGame();
                 break;
             case "pressBombardment":
                 Debug.Log("Starting press bombardment. Completions: " + c);
@@ -207,6 +209,7 @@ public class ClassroomInput : MonoBehaviour
             case "colorTheory":
                 Debug.Log("Starting color theory. Completions: " + c);
                 paintSpawner artScript = FindIn<paintSpawner>(scene);
+                if (c == 0) artScript.tutorial = true;
                 artScript.startPairs = 2 + c;
                 artScript.roundsToWin = 3 + c;
                 artScript.StartGame();
@@ -214,7 +217,8 @@ public class ClassroomInput : MonoBehaviour
             case "mobliterator":
                 Debug.Log("Starting mobliterator. Completions: " + c);
                 mobliterator chemScript = FindIn<mobliterator>(scene);
-                chemScript.moleculeCount = 30 + 5 * c;
+                if (c == 0) chemScript.tutorial = true;
+                chemScript.moleculeCount = 30 + 2 * c;
                 chemScript.StartGame();
                 break;
             case "geography":

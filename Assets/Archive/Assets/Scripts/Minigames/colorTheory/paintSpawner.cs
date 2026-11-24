@@ -67,6 +67,11 @@ public class paintSpawner : MonoBehaviour
 
     [Header("Timer")]
     [SerializeField] private float maxTime = 20f;             // the bar is full at this value, time can't go above it
+
+    public bool tutorial;
+    private bool _timerOff;
+    private float _savedMaxTime;
+    
     [SerializeField] private float startTime = 20f;
     [SerializeField] private float timeBonus = 5f;            // seconds gained for completing a round
     [SerializeField] private Transform timerBar;              // scaled horizontally, its left edge stays in place
@@ -158,12 +163,15 @@ public class paintSpawner : MonoBehaviour
             return;
         }
 
-        timeLeft -= DeltaTime;
-        if (timeLeft <= 0f)
+        if (!_timerOff)   // the tutorial's first round has no timer
         {
-            timeLeft = 0f;
-            EndGame();
-            return;
+            timeLeft -= DeltaTime;
+            if (timeLeft <= 0f)
+            {
+                timeLeft = 0f;
+                EndGame();
+                return;
+            }
         }
         UpdateBar();
     }
@@ -222,6 +230,14 @@ public class paintSpawner : MonoBehaviour
         timeLeft = Mathf.Min(startTime, maxTime);
         _gameOver = false;
         _transitioning = false;
+        
+        if (tutorial)
+        {
+            _timerOff = true;
+            _savedMaxTime = maxTime;
+            maxTime = 0f;
+        }
+        
         UpdateBar();
         StartRound();
     }
@@ -243,6 +259,11 @@ public class paintSpawner : MonoBehaviour
 
     private void FinishRound()
     {
+        if (_timerOff)
+        {
+            _timerOff = false;
+            maxTime = _savedMaxTime;
+        }
         roundsCompleted++;
         Play(roundCompleteSound, roundCompleteVolume);
         timeLeft = Mathf.Min(maxTime, timeLeft + timeBonus);
@@ -354,7 +375,6 @@ public class paintSpawner : MonoBehaviour
     private void InitBar()
     {
         if (timerBar == null) return;
-
         _barFullScale = timerBar.localScale;
 
         // the bar shrinks towards its left edge, whatever the sprite's pivot is
