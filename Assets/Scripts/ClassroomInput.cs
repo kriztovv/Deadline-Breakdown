@@ -209,6 +209,7 @@ public class ClassroomInput : MonoBehaviour
             case "colorTheory":
                 Debug.Log("Starting color theory. Completions: " + c);
                 paintSpawner artScript = FindIn<paintSpawner>(scene);
+                if (c == 0) artScript.tutorial = true;
                 artScript.startPairs = 2 + c;
                 artScript.roundsToWin = 3 + c;
                 artScript.StartGame();

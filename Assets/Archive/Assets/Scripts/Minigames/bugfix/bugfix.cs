@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -91,12 +92,18 @@ public class bugfix : minigameController
         if (_inTutorial)
         {
             _tutorialEliminated++;
-            if (_tutorialEliminated >= tutorialBugsRequired) BeginGame();
+            if (_tutorialEliminated >= 4) StartCoroutine(TutorialEndDelay());
             return;   // the tutorial bugs don't count for the real game
         }
 
         _eliminated++;
         Debug.Log($"Bugs eliminated: {_eliminated}");
+    }
+
+    private IEnumerator TutorialEndDelay()
+    {
+        yield return new WaitForSeconds(1f);
+        BeginGame();
     }
 
     public bool SpawnBug()
@@ -170,6 +177,7 @@ public class bugfix : minigameController
         if (timerBar == null) return;
 
         float fraction = maxTime > 0f ? Mathf.Clamp01(timeLeft / maxTime) : 0f;
+        Debug.Log("Time left: " + timeLeft + "Max Time: " + maxTime);
 
         Vector3 scale = _barFullScale;
         scale.x = _barFullScale.x * fraction;
