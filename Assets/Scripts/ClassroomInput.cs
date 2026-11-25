@@ -188,8 +188,9 @@ public class ClassroomInput : MonoBehaviour
             case "pressBombardment":
                 Debug.Log("Starting press bombardment. Completions: " + c);
                 pressBombardment pressScript = FindIn<pressBombardment>(scene);
-                pressScript.startReadTime = (float)(2 - c * 0.25);
-                pressScript.startAnswerTime = (float)(4 - c * 0.25);
+                if (c == 0) pressScript.tutorial = true;
+                pressScript.startReadTime = (float)(4 - c * 0.25);
+                pressScript.startAnswerTime = (float)(6 - c * 0.25);
                 pressScript.StartGame();
                 break;
             case "investit":

@@ -11878,6 +11878,10 @@ MonoBehaviour:
   spawnInterval: 1
   minSpawnInterval: 0.2
   rampDuration: 120
+  tutorial: 0
+  gameRoot: {fileID: 0}
+  tutorialRoot: {fileID: 0}
+  tutorialBugsRequired: 4
   perfect: 1
   maxTime: 20
   startTime: 20
