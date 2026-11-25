@@ -12,6 +12,7 @@ public class Doser : ScriptableObject
     [System.NonSerialized] public Queue<float> CurveQueue;
     public float uncertainty;
     public List<string> special;
+    public Sprite icon;
     
     public void SetQueue()
     {

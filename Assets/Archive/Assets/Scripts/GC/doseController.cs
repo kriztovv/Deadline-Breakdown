@@ -22,11 +22,10 @@ public class doseController : MonoBehaviour
     [SerializeField] private AudioClip deathSound;
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip menuMusic;
-    private GameObject notification;
+
 
     private void Start()
     {
-        notification = GameObject.Find("notification");
         _energyQueue = new Queue<int>();
         _energyQueue.Enqueue(0);
         _energyQueue.Enqueue(0);
@@ -134,12 +133,15 @@ public class doseController : MonoBehaviour
         deathSequence.TriggerDeath();
 
         SFXManager.instance.PlaySFX(deathSound, transform, 1);
+        if (NotificationManager.Instance != null)
+        {
+            NotificationManager.Instance.ClearAll();
+        }
         
         crosshair.SetActive(false);
         tutText.SetActive(false);
         heldText.SetActive(false);
         graphObj.SetActive(false);
         workPrompt.SetActive(false);
-        notification.SetActive(false);
     }
 }

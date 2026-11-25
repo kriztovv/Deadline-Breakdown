@@ -15,6 +15,9 @@ EditorBuildSettings:
     path: Assets/Scenes/RoomScene.unity
     guid: 6c43fb1f24d42094eb4c5497e7ce71ba
   - enabled: 1
+    path: Assets/Scenes/RoomVisual.unity
+    guid: 8d151c85950dfd84c84d643763f25f67
+  - enabled: 1
     path: Assets/Scenes/pressBombardment.unity
     guid: f9c978e7c20ee944cb8964cdab3d4438
   - enabled: 1

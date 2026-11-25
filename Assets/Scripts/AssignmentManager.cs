@@ -28,6 +28,7 @@ public class AssignmentManager : MonoBehaviour
     
     private readonly Dictionary<string, float> timers = new Dictionary<string, float>();
     private readonly List<string> tempKeys = new List<string>();
+    private readonly Dictionary<string, NotificationItem> notifications = new Dictionary<string, NotificationItem>();
     private float spawnTimer;
     
     public int GradeIndex(string id) => grades.TryGetValue(id, out int g) ? g : startGrade;
@@ -53,6 +54,9 @@ public class AssignmentManager : MonoBehaviour
     public string LetterFor(int index) => gradeLetters[Mathf.Clamp(index, 0, gradeLetters.Length - 1)];
 
     
+    [Header("Notification look")]
+    [SerializeField] private NotificationItem notificationPrefab;   // the AssignmentNotification prefab
+
     [SerializeField] private GameObject workPrompt;
     [SerializeField] private GameObject crosshair;
     [SerializeField] private minigameInputController minigameInputController;
@@ -78,6 +82,7 @@ public class AssignmentManager : MonoBehaviour
     private void OnDied()
     {
         Dead = true;
+        ClearNotifications();
         pendingFail = null;
         queued.Clear();
     } 
@@ -116,6 +121,7 @@ public class AssignmentManager : MonoBehaviour
             if (timers[id] <= 0f)
             {
                 timers.Remove(id);
+                DismissNotification(id);   // deadline missed
                 AssignmentManager.Instance.Worsen(id);
             }
         }
@@ -129,14 +135,14 @@ public class AssignmentManager : MonoBehaviour
 
         if (Input.anyKeyDown)
         {
-            if (Input.GetKeyDown(KeyCode.Keypad0)) timers["Geography"] = 180f;
-            if (Input.GetKeyDown(KeyCode.Keypad1)) timers["Marketing"] = 180f;
-            if (Input.GetKeyDown(KeyCode.Keypad2)) timers["PE"] = 180f;
-            if (Input.GetKeyDown(KeyCode.Keypad3)) timers["History"] = 180f;
-            if (Input.GetKeyDown(KeyCode.Keypad4)) timers["IT"] = 180f;
-            if (Input.GetKeyDown(KeyCode.Keypad5)) timers["Finance"] = 180f;
-            if (Input.GetKeyDown(KeyCode.Keypad6)) timers["Art"] = 180f;
-            if (Input.GetKeyDown(KeyCode.Keypad7)) timers["Chemistry"] = 180f;
+            if (Input.GetKeyDown(KeyCode.Keypad0)) StartAssignment("Geography", 180f);
+            if (Input.GetKeyDown(KeyCode.Keypad1)) StartAssignment("Marketing", 180f);
+            if (Input.GetKeyDown(KeyCode.Keypad2)) StartAssignment("PE", 180f);
+            if (Input.GetKeyDown(KeyCode.Keypad3)) StartAssignment("History", 180f);
+            if (Input.GetKeyDown(KeyCode.Keypad4)) StartAssignment("IT", 180f);
+            if (Input.GetKeyDown(KeyCode.Keypad5)) StartAssignment("Finance", 180f);
+            if (Input.GetKeyDown(KeyCode.Keypad6)) StartAssignment("Art", 180f);
+            if (Input.GetKeyDown(KeyCode.Keypad7)) StartAssignment("Chemistry", 180f);
         }
     }
     
@@ -151,6 +157,7 @@ public class AssignmentManager : MonoBehaviour
 
         // clear running assignments and start fresh
         timers.Clear();
+        ClearNotifications();
         ActivateRandom();
         spawnTimer = newAssignmentInterval;
     }
@@ -225,7 +232,36 @@ public class AssignmentManager : MonoBehaviour
         float duration = Random.Range(30, 120);
         if (IsBonus(pick)) duration += bonusSeconds;   // the perk's subject gets extra time
 
-        timers[pick] = duration;
+        StartAssignment(pick, duration);
+    }
+
+    // Single entry point for starting an assignment, so its notification can't be forgotten
+    private void StartAssignment(string id, float duration)
+    {
+        timers[id] = duration;
+
+        DismissNotification(id);   // replaces a leftover one if the assignment was restarted
+        if (Dead || NotificationManager.Instance == null) return;
+
+        // Stays on screen until the assignment is submitted or missed
+        notifications[id] = NotificationManager.Instance.Push(notificationPrefab, id, "New assignment");
+    }
+
+    private void DismissNotification(string id)
+    {
+        if (!notifications.Remove(id, out var item)) return;
+
+        if (NotificationManager.Instance != null)
+            NotificationManager.Instance.Dismiss(item);
+    }
+
+    private void ClearNotifications()
+    {
+        foreach (var item in notifications.Values)
+            if (NotificationManager.Instance != null)
+                NotificationManager.Instance.Dismiss(item);
+
+        notifications.Clear();
     }
     
     // called by the perk when it's picked
@@ -279,5 +315,9 @@ public class AssignmentManager : MonoBehaviour
 
     public bool IsActive(string id) => timers.ContainsKey(id);
     public float TimeLeft(string id) => timers.TryGetValue(id, out float t) ? t : 0f;
-    public void Complete(string id) => timers.Remove(id); // call when the mini-game is won
+    public void Complete(string id)   // call when the mini-game is won
+    {
+        timers.Remove(id);
+        DismissNotification(id);
+    }
 }

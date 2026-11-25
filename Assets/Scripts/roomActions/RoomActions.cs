@@ -7,10 +7,6 @@ public abstract class RoomAction : MonoBehaviour
     [SerializeField, TextArea(2, 4)] string description; // shown under the title
     [SerializeField] float timeLimit = 30f; // 0 = no limit
     [SerializeField] float weight = 1f;     // random pick weight
-
-    [Header("Default failure (game over)")]
-    [SerializeField] AudioClip deathSound;
-
     public string Title => title;
     public string Description => description;
     public float TimeLimit => timeLimit;
