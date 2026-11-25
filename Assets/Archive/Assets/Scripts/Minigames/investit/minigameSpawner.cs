@@ -19,7 +19,7 @@ public class minigameSpawner : MonoBehaviour
     private float _startTime;
     private float _nextSpawn;
 
-    public void StartGame()
+    private void Start()
     {
         if (startInterval < minInterval) startInterval = minInterval;
         

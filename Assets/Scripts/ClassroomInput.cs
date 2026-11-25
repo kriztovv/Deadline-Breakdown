@@ -194,10 +194,12 @@ public class ClassroomInput : MonoBehaviour
                 break;
             case "investit":
                 Debug.Log("Starting invest-it. Completions: " + c);
-                minigameSpawner investScript = FindIn<minigameSpawner>(scene);
-                investScript.startInterval = (float)(0.4 - c / 10f);
-                FindIn<investit>(scene).requiredMoney = 10 +  c * 2;
-                investScript.StartGame();
+                minigameSpawner spawnScript = FindIn<minigameSpawner>(scene); 
+                investit investitScript = FindIn<investit>(scene);
+                if (c == 0) investitScript.tutorial = true;
+                spawnScript.startInterval = (float)(0.4 - c / 10f);
+                investitScript.requiredMoney = 10 +  c * 2;
+                investitScript.StartGame();
                 break;
             case "dashingLad":
                 Debug.Log("Starting dashing lad. Completions: " + c);
