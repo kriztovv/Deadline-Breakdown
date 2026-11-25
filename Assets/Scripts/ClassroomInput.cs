@@ -227,6 +227,7 @@ public class ClassroomInput : MonoBehaviour
             case "geography":
                 Debug.Log("Starting geography. Completions: " + c);
                 geography geoScript = FindIn<geography>(scene);
+                if (c == 0) geoScript.tutorial = true;
                 geoScript.spawnDelay = (float)(1 - c * 0.05);
                 geoScript.projectileSpeed = (float)(4 + c * 0.2);
                 geoScript.StartGame();

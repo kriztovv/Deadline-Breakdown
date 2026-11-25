@@ -763,6 +763,10 @@ MonoBehaviour:
   spawnDelayRandomness: 0.5
   projectileSpeed: 3
   spawnDistance: 13
+  tutorial: 0
+  tutorialProjectileSpeed: 2.5
+  tutorialStepDelay: 3
+  tutorialPairDelay: 1
   shield: {fileID: 2136412812}
   shieldRadius: 3
   snapSharpness: 20
