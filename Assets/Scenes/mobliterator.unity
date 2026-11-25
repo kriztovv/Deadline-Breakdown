@@ -2203,6 +2203,21 @@ MonoBehaviour:
   timerBar: {fileID: 563438937}
   endDelay: 1.5
   tutorial: 0
+  spawnSound: {fileID: 8300000, guid: 2579b68a92f290d6d92a64e016fd3d5a, type: 3}
+  spawnVolume: 0.3
+  shootSound: {fileID: 8300000, guid: 43c429448061b4841be9be132433ec27, type: 3}
+  shootVolume: 0.8
+  hitSound: {fileID: 8300000, guid: 97d3a14ab312740bfab66f792f8b2336, type: 3}
+  hitVolume: 1
+  settleSound: {fileID: 0}
+  settleVolume: 0.6
+  popSound: {fileID: 8300000, guid: 5e8cff4716e7770489ec515199415b13, type: 3}
+  popVolume: 0.1
+  timeoutSound: {fileID: 8300000, guid: 6e689a9dae663697ab6780c8be3ab22f, type: 3}
+  timeoutVolume: 1
+  popPitchStep: 0.05
+  maxPopPitch: 2
+  comboWindow: 1
 --- !u!58 &763165350
 CircleCollider2D:
   m_ObjectHideFlags: 0

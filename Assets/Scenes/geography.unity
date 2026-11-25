@@ -773,10 +773,16 @@ MonoBehaviour:
   centerCollider: {fileID: 1700254644}
   defendedText: {fileID: 0}
   passedText: {fileID: 0}
-  gameTime: 30
+  gameTime: 15
   timerBar: {fileID: 98806185}
   endDelay: 1.5
   subjectId: Geography
+  spawnSound: {fileID: 8300000, guid: aa194f5ef4a927165a0d7a30b4ebbcc1, type: 3}
+  spawnVolume: 0.5
+  blockSound: {fileID: 8300000, guid: 31720580c71ce164099d836056323a7a, type: 3}
+  blockVolume: 0.4
+  hitSound: {fileID: 8300000, guid: 6e689a9dae663697ab6780c8be3ab22f, type: 3}
+  hitVolume: 0.8
 --- !u!212 &612776896
 SpriteRenderer:
   serializedVersion: 3

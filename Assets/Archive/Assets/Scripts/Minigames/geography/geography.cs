@@ -37,6 +37,14 @@ public class geography : minigameController
 
     [Header("Grade")]
     [SerializeField] private string subjectId = "Geography";
+    
+    [Header("Sounds")]
+    [SerializeField] private AudioClip spawnSound;       // a projectile appears
+    [SerializeField, Range(0f, 1f)] private float spawnVolume = 0.4f;
+    [SerializeField] private AudioClip blockSound;       // a projectile hits the shield
+    [SerializeField, Range(0f, 1f)] private float blockVolume = 0.8f;
+    [SerializeField] private AudioClip hitSound;         // a projectile goes through and hits the middle
+    [SerializeField, Range(0f, 1f)] private float hitVolume = 0.8f;
 
     // The 5 directions, in degrees: 0 = right, 90 = top, 180 = left. Used for the spawns and the shield.
     private static readonly float[] Angles = { 0f, 45f, 90f, 135f, 180f };
@@ -63,6 +71,11 @@ public class geography : minigameController
         if (centerCollider == null) centerCollider = GetComponent<Collider2D>();
     }
 
+    private void Play(AudioClip clip, float volume)
+    {
+        if (clip != null) SFXManager.instance.PlaySFX(clip, transform, volume);
+    }
+    
     public void StartGame()
     {
         if (projectilePrefabs == null || projectilePrefabs.Length == 0)
@@ -199,6 +212,7 @@ public class geography : minigameController
         p.Launch(this, -dir * speed);   // straight toward the middle
 
         _projectiles.Add(go);
+        Play(spawnSound, spawnVolume);
         // ANIMATION: warning flash on the side it comes from
     }
 
@@ -211,12 +225,14 @@ public class geography : minigameController
         {
             p.Resolved = true;
             _defended++;
+            Play(blockSound, blockVolume);
             // ANIMATION: block effect on the shield
         }
         else if (other == centerCollider)
         {
             p.Resolved = true;
             _passed++;
+            Play(hitSound, hitVolume);
             if (!_tutorialMode && _passed % 2 == 0)   // the tutorial doesn't touch the grade
             {
                 AssignmentManager.Instance.Worsen(subjectId);
@@ -224,8 +240,7 @@ public class geography : minigameController
             }
             // ANIMATION: hit effect on the dome
         }
-        else return;   // touched something else (e.g. another projectile)
-
+        
         _projectiles.Remove(p.gameObject);
         Destroy(p.gameObject);
         UpdateCounters();
