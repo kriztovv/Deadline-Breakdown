@@ -24549,7 +24549,7 @@ MonoBehaviour:
   roomScenes:
   - RoomVisual
   - TestVisual
-  autoChange: 1
+  autoChange: 0
   intervalRange: {x: 30, y: 90}
   unscaledTimer: 0
 --- !u!4 &1935377581
