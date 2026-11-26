@@ -30,6 +30,9 @@ public class molecule : MonoBehaviour
 
     public event System.Action<molecule> ShotFinished;   // popped, settle timer ran out, or flew away
     public static event System.Action<molecule> AnyPopped;   // every pop, for the minigame's counter
+    public enum ShotEvent { Launched, Hit, Settled, TimedOut }
+    public event System.Action<molecule, ShotEvent> ShotEventRaised;   // for the minigame's sounds
+    
     public bool InMass => !_isShot || _shotState == ShotState.Settling;   // part of the mass: not waiting or flying
     public bool IsWaiting => _shotState == ShotState.Waiting;   // still at the shoot point, not fired yet
 
@@ -136,6 +139,7 @@ public class molecule : MonoBehaviour
         _rb.bodyType = RigidbodyType2D.Dynamic;
         _shotVelocity = direction.normalized * speed;
         StartCoroutine(FlightRoutine());
+        ShotEventRaised?.Invoke(this, ShotEvent.Launched);
     }
     
     private IEnumerator FlightRoutine()
@@ -143,6 +147,7 @@ public class molecule : MonoBehaviour
         yield return new WaitForSeconds(maxFlightTime);
         if (_shotState != ShotState.Flying) yield break;   // it hit something in time
 
+        ShotEventRaised?.Invoke(this, ShotEvent.TimedOut);
         FinishShot();
         // ANIMATION: fade out
         Destroy(gameObject);
@@ -150,6 +155,7 @@ public class molecule : MonoBehaviour
 
     private void BeginSettle()
     {
+        ShotEventRaised?.Invoke(this, ShotEvent.Hit);
         _shotState = ShotState.Settling;
         gravityOn = true;   // we stop setting the velocity, so it keeps whatever momentum it has and gravity takes over
         StartCoroutine(SettleRoutine());
@@ -158,7 +164,11 @@ public class molecule : MonoBehaviour
     private IEnumerator SettleRoutine()
     {
         yield return new WaitForSeconds(settleTime);
-        if (_shotState == ShotState.Settling) FinishShot();   // no match: it stays in the mass as a normal molecule
+        if (_shotState == ShotState.Settling)   // no match: it stays in the mass as a normal molecule
+        {
+            ShotEventRaised?.Invoke(this, ShotEvent.Settled);
+            FinishShot();
+        }
     }
 
     private void FinishShot()

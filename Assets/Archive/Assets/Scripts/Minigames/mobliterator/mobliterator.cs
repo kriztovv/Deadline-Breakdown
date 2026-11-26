@@ -32,6 +32,27 @@ public class mobliterator : minigameController
     [SerializeField] private float endDelay = 1.5f;          // real seconds between the end and closing the minigame
     public bool tutorial;
 
+    [Header("Sounds")]
+    [SerializeField] private AudioClip spawnSound;       // the molecule to shoot appears
+    [SerializeField, Range(0f, 1f)] private float spawnVolume = 0.4f;
+    [SerializeField] private AudioClip shootSound;       // the player fires it
+    [SerializeField, Range(0f, 1f)] private float shootVolume = 0.8f;
+    [SerializeField] private AudioClip hitSound;         // the shot hits something
+    [SerializeField, Range(0f, 1f)] private float hitVolume = 0.8f;
+    [SerializeField] private AudioClip settleSound;      // it settled without popping
+    [SerializeField, Range(0f, 1f)] private float settleVolume = 0.6f;
+    [SerializeField] private AudioClip popSound;         // any molecule pops
+    [SerializeField, Range(0f, 1f)] private float popVolume = 0.6f;
+    [SerializeField] private AudioClip timeoutSound;     // the shot flew away and was removed
+    [SerializeField, Range(0f, 1f)] private float timeoutVolume = 0.6f;
+    
+    [SerializeField] private float popPitchStep = 0.05f;   // pitch added for each pop in a row
+    [SerializeField] private float maxPopPitch = 2f;       // the pitch never goes above this
+    [SerializeField] private float comboWindow = 1f;       // seconds without a pop before the pitch resets (world time)
+
+    private int _popCombo;
+    private float _lastPopTime = -999f;
+    
     private readonly List<GameObject> _spawned = new List<GameObject>();
     private molecule _shot;        // the molecule that is waiting or flying
     private Coroutine _respawn;
@@ -62,6 +83,7 @@ public class mobliterator : minigameController
         if (_shot != null)
         {
             _shot.ShotFinished -= OnShotFinished;
+            _shot.ShotEventRaised -= OnShotEvent;
             Destroy(_shot.gameObject);
             _shot = null;
         }
@@ -96,6 +118,41 @@ public class mobliterator : minigameController
         SpawnShot();
     }
 
+    private void Play(AudioClip clip, float volume)
+    {
+        if (clip != null) SFXManager.instance.PlaySFX(clip, transform, volume);
+    }
+    
+    // SFXManager has no pitch, so this plays through its own short-lived AudioSource
+    private void PlayPitched(AudioClip clip, float volume, float pitch)
+    {
+        if (clip == null) return;
+
+        GameObject go = new GameObject("popSFX");
+        go.transform.SetParent(transform, false);   // child of this object, so it stays in this scene
+
+        AudioSource src = go.AddComponent<AudioSource>();
+        src.clip = clip;
+        src.volume = volume;
+        src.pitch = pitch;
+        src.spatialBlend = 0f;   // 2D
+        src.playOnAwake = false;
+        src.Play();
+
+        Destroy(go, clip.length / pitch + 0.1f);   // a higher pitch plays the clip faster
+    }
+
+    private void OnShotEvent(molecule m, molecule.ShotEvent e)
+    {
+        switch (e)
+        {
+            case molecule.ShotEvent.Launched: Play(shootSound, shootVolume); break;
+            case molecule.ShotEvent.Hit:      Play(hitSound, hitVolume); break;
+            case molecule.ShotEvent.Settled:  Play(settleSound, settleVolume); break;
+            case molecule.ShotEvent.TimedOut: Play(timeoutSound, timeoutVolume); break;
+        }
+    }
+    
     private void SpawnShot()
     {
         _respawn = null;
@@ -117,21 +174,20 @@ public class mobliterator : minigameController
         }
 
         _shot.ShotFinished += OnShotFinished;
+        _shot.ShotEventRaised += OnShotEvent;
         _shot.PrepareAsShot(gravityCenter);
+        Play(spawnSound, spawnVolume);
         // ANIMATION: the new molecule appears at the shoot point (scale or fade in)
     }
 
     private void OnShotFinished(molecule m)
     {
         m.ShotFinished -= OnShotFinished;
+        m.ShotEventRaised -= OnShotEvent;
         if (_shot == m) _shot = null;
 
         // a settled shot stays in the mass, so the next round clears it too (a popped one is already being destroyed)
         _spawned.Add(m.gameObject);
-
-        if (_ended) return;
-        if (_respawn != null) StopCoroutine(_respawn);
-        _respawn = StartCoroutine(RespawnRoutine());
     }
 
     private IEnumerator RespawnRoutine()
@@ -143,6 +199,12 @@ public class mobliterator : minigameController
     // Counting
     private void OnMoleculePopped(molecule m)
     {
+        // the pitch rises with every pop in a row and resets after a pause
+        if (Time.time - _lastPopTime > comboWindow) _popCombo = 0;
+        _lastPopTime = Time.time;
+        float pitch = Mathf.Min(maxPopPitch, 1f + popPitchStep * _popCombo);
+        _popCombo++;
+        PlayPitched(popSound, popVolume, pitch);
         _popped++;
         UpdateCounter();
         StartCoroutine(CheckAllPopped());
@@ -259,6 +321,8 @@ public class mobliterator : minigameController
     {
         if (!_running || _shot == null) return;
         _shot.Launch(AimDirection(), shotSpeed);   // ignored if it was already fired
+        if (_respawn != null) return;
+        _respawn = StartCoroutine(RespawnRoutine());
     }
 
     // Timer bar (same as investit)

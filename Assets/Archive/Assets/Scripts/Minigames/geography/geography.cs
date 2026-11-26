@@ -12,6 +12,12 @@ public class geography : minigameController
     public float projectileSpeed = 3f;          // units per second, not randomized
     [SerializeField] private float spawnDistance = 7f;   // how far from the middle they appear (outside the visible area)
 
+    [Header("Tutorial (follows timeScale)")]
+    public bool tutorial;                          // true when the game starts = the scripted waves instead of the normal game
+    public float tutorialProjectileSpeed = 1.5f;   // slower than the normal ones
+    public float tutorialStepDelay = 1f;           // the pause between the groups (and before a repeat)
+    public float tutorialPairDelay = 0.4f;         // the short pause between the two of a pair (right/left, the diagonals)
+
     [Header("Shield (ignores timeScale)")]
     [SerializeField] private Transform shield;           // a bar whose sprite faces up at the top position
     [SerializeField] private float shieldRadius = 1.5f;  // distance of the shield from the middle
@@ -31,6 +37,14 @@ public class geography : minigameController
 
     [Header("Grade")]
     [SerializeField] private string subjectId = "Geography";
+    
+    [Header("Sounds")]
+    [SerializeField] private AudioClip spawnSound;       // a projectile appears
+    [SerializeField, Range(0f, 1f)] private float spawnVolume = 0.4f;
+    [SerializeField] private AudioClip blockSound;       // a projectile hits the shield
+    [SerializeField, Range(0f, 1f)] private float blockVolume = 0.8f;
+    [SerializeField] private AudioClip hitSound;         // a projectile goes through and hits the middle
+    [SerializeField, Range(0f, 1f)] private float hitVolume = 0.8f;
 
     // The 5 directions, in degrees: 0 = right, 90 = top, 180 = left. Used for the spawns and the shield.
     private static readonly float[] Angles = { 0f, 45f, 90f, 135f, 180f };
@@ -40,6 +54,8 @@ public class geography : minigameController
     private float _spawnTimer;
     private float _elapsed;
     private bool _running;
+    private bool _tutorialMode;          // this run is the tutorial (no timer, no random spawns, no grade changes)
+    private Coroutine _tutorialRoutine;
     private int _defended, _passed;
 
     private bool _barReady;
@@ -55,6 +71,11 @@ public class geography : minigameController
         if (centerCollider == null) centerCollider = GetComponent<Collider2D>();
     }
 
+    private void Play(AudioClip clip, float volume)
+    {
+        if (clip != null) SFXManager.instance.PlaySFX(clip, transform, volume);
+    }
+    
     public void StartGame()
     {
         if (projectilePrefabs == null || projectilePrefabs.Length == 0)
@@ -63,25 +84,37 @@ public class geography : minigameController
             return;
         }
 
+        if (_tutorialRoutine != null) { StopCoroutine(_tutorialRoutine); _tutorialRoutine = null; }
+
         ClearProjectiles();
         _defended = _passed = 0;
         _elapsed = 0f;
         _spawnTimer = NextDelay();
+        _tutorialMode = tutorial;
         _running = true;
 
         if (projectileSpeed > 9) projectileSpeed = 9;
         if (spawnDelay < 0.2) spawnDelay = 0.2f;
-        
+
         InitBar();
         UpdateBar();
         UpdateCounters();
+        SetBarVisible(!_tutorialMode);
+
+        if (_tutorialMode) _tutorialRoutine = StartCoroutine(TutorialRoutine());
     }
 
+    private void SetBarVisible(bool visible)
+    {
+        if (timerBar != null && timerBar.gameObject.activeSelf != visible)
+            timerBar.gameObject.SetActive(visible);
+    }
+    
     protected override void MgUpdate()
     {
         UpdateShield();   // always, so it already follows the keys before the game starts
 
-        if (!_running) return;
+        if (!_running || _tutorialMode) return;   // the tutorial has no timer and no random spawns
 
         // Timer: real time
         _elapsed += Time.unscaledDeltaTime;
@@ -92,8 +125,49 @@ public class geography : minigameController
         _spawnTimer -= Time.deltaTime;
         if (_spawnTimer <= 0f)
         {
-            Spawn();
+            SpawnAt(Angles[Random.Range(0, Angles.Length)], projectileSpeed);
             _spawnTimer = NextDelay();
+        }
+    }
+
+    // Tutorial: the same waves until the player lets nothing through, then the minigame ends
+    private IEnumerator TutorialRoutine()
+    {
+        while (_running)
+        {
+            _defended = _passed = 0;
+            UpdateCounters();
+
+            SpawnAt(90f, tutorialProjectileSpeed);    // 1 from the top
+            yield return new WaitForSeconds(tutorialStepDelay);
+
+            SpawnAt(0f, tutorialProjectileSpeed);     // 1 from the right
+            yield return new WaitForSeconds(tutorialPairDelay);
+            SpawnAt(180f, tutorialProjectileSpeed);   // then 1 from the left
+            yield return new WaitForSeconds(tutorialStepDelay);
+
+            SpawnAt(45f, tutorialProjectileSpeed);    // 1 from each diagonal
+            yield return new WaitForSeconds(tutorialPairDelay);
+            SpawnAt(135f, tutorialProjectileSpeed);
+
+            // wait until the last ones were blocked or got through
+            while (_running)
+            {
+                _projectiles.RemoveAll(go => go == null);
+                if (_projectiles.Count == 0) break;
+                yield return null;
+            }
+            if (!_running) yield break;
+
+            if (_passed == 0)
+            {
+                EndGame();   // nothing got through
+                yield break;
+            }
+
+            // something got through: from the start again
+            // ANIMATION: "try again" feedback
+            yield return new WaitForSeconds(tutorialStepDelay);
         }
     }
 
@@ -123,21 +197,22 @@ public class geography : minigameController
     }
 
     // Projectiles
-    private void Spawn()
+    private void SpawnAt(float angle, float speed)
     {
         GameObject prefab = projectilePrefabs[Random.Range(0, projectilePrefabs.Length)];
         if (prefab == null) return;
 
-        Vector2 dir = Direction(Angles[Random.Range(0, Angles.Length)]);
+        Vector2 dir = Direction(angle);
         Vector2 pos = (Vector2)transform.position + dir * spawnDistance;
 
         // as a child of this object, so it ends up in THIS scene (Instantiate alone uses the active scene)
         GameObject go = Instantiate(prefab, new Vector3(pos.x, pos.y, transform.position.z), Quaternion.identity, transform);
 
         if (!go.TryGetComponent(out geographyProjectile p)) p = go.AddComponent<geographyProjectile>();
-        p.Launch(this, -dir * projectileSpeed);   // straight toward the middle
+        p.Launch(this, -dir * speed);   // straight toward the middle
 
         _projectiles.Add(go);
+        Play(spawnSound, spawnVolume);
         // ANIMATION: warning flash on the side it comes from
     }
 
@@ -150,21 +225,22 @@ public class geography : minigameController
         {
             p.Resolved = true;
             _defended++;
+            Play(blockSound, blockVolume);
             // ANIMATION: block effect on the shield
         }
         else if (other == centerCollider)
         {
             p.Resolved = true;
             _passed++;
-            if (_passed % 2 == 0)
+            Play(hitSound, hitVolume);
+            if (!_tutorialMode && _passed % 2 == 0)   // the tutorial doesn't touch the grade
             {
                 AssignmentManager.Instance.Worsen(subjectId);
                 Debug.Log("Grade worsened");
             }
             // ANIMATION: hit effect on the dome
         }
-        else return;   // touched something else (e.g. another projectile)
-
+        
         _projectiles.Remove(p.gameObject);
         Destroy(p.gameObject);
         UpdateCounters();
@@ -200,9 +276,9 @@ public class geography : minigameController
         _running = false;
         ClearProjectiles();   // nothing may hit after the end
 
-        Debug.Log($"geography: defended {_defended}, passed {_passed}");
+        Debug.Log($"geography: defended {_defended}, passed {_passed}{(_tutorialMode ? " (tutorial)" : "")}");
 
-        if (_passed == 0)
+        if (!_tutorialMode && _passed == 0)
         {
             AssignmentManager.Instance.Improve(subjectId);
         }

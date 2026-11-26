@@ -741,6 +741,8 @@ MonoBehaviour:
   minAnswerTime: 1.5
   timersIgnoreTimeScale: 0
   confirmKey: 32
+  tutorial: 0
+  tutorialQuestion: {fileID: 11400000, guid: 176e58ec6adf744678d3f33c66dc81ac, type: 2}
   shuffleAnswers: 1
 --- !u!114 &824656301
 MonoBehaviour:
@@ -1983,9 +1985,9 @@ MonoBehaviour:
   m_fontSize: 5
   m_fontSizeBase: 5
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 2
+  m_fontSizeMax: 5
   m_fontStyle: 0
   m_HorizontalAlignment: 8
   m_VerticalAlignment: 512

@@ -188,16 +188,19 @@ public class ClassroomInput : MonoBehaviour
             case "pressBombardment":
                 Debug.Log("Starting press bombardment. Completions: " + c);
                 pressBombardment pressScript = FindIn<pressBombardment>(scene);
-                pressScript.startReadTime = (float)(2 - c * 0.25);
-                pressScript.startAnswerTime = (float)(4 - c * 0.25);
+                if (c == 0) pressScript.tutorial = true;
+                pressScript.startReadTime = (float)(4 - c * 0.25);
+                pressScript.startAnswerTime = (float)(6 - c * 0.25);
                 pressScript.StartGame();
                 break;
             case "investit":
                 Debug.Log("Starting invest-it. Completions: " + c);
-                minigameSpawner investScript = FindIn<minigameSpawner>(scene);
-                investScript.startInterval = (float)(0.4 - c / 10f);
-                FindIn<investit>(scene).requiredMoney = 10 +  c * 2;
-                investScript.StartGame();
+                minigameSpawner spawnScript = FindIn<minigameSpawner>(scene); 
+                investit investitScript = FindIn<investit>(scene);
+                if (c == 0) investitScript.tutorial = true;
+                spawnScript.startInterval = (float)(0.4 - c / 10f);
+                investitScript.requiredMoney = 10 +  c * 2;
+                investitScript.StartGame();
                 break;
             case "dashingLad":
                 Debug.Log("Starting dashing lad. Completions: " + c);
@@ -224,6 +227,7 @@ public class ClassroomInput : MonoBehaviour
             case "geography":
                 Debug.Log("Starting geography. Completions: " + c);
                 geography geoScript = FindIn<geography>(scene);
+                if (c == 0) geoScript.tutorial = true;
                 geoScript.spawnDelay = (float)(1 - c * 0.05);
                 geoScript.projectileSpeed = (float)(4 + c * 0.2);
                 geoScript.StartGame();

@@ -26,5 +26,6 @@ MonoBehaviour:
   - 0.1
   uncertainty: 15
   special: []
+  icon: {fileID: 21300000, guid: c6177cc4eeb9fb543b023c34f0ae7e57, type: 3}
   doserName: Medium risk pill
   description: 

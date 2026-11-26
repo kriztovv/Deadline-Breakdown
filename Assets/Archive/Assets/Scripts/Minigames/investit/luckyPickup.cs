@@ -58,7 +58,6 @@ public class luckyPickup : MonoBehaviour
         // Each pickup is counted once, even if several events arrive before it's destroyed
         _collected.RemoveWhere(g => g == null);
         if (!_collected.Add(pickup.gameObject)) return;
-
         switch (pickup.name)
         {
             case "bad(Clone)":

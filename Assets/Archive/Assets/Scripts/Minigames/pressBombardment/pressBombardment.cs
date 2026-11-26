@@ -62,6 +62,13 @@ public class pressBombardment : minigameController
     [Header("Input")]
     [SerializeField] private KeyCode confirmKey = KeyCode.Space;
     
+    [Header("Tutorial")]
+    public bool tutorial;                                    // true when the game starts = the tutorial question comes first
+    [SerializeField] private businessQuestion tutorialQuestion;
+
+    private bool _tutorialActive;
+    private bool _lastCorrect;
+    
     [SerializeField] private bool shuffleAnswers = true;
     private int[] _order = new int[0];   // _order[slot] = index of the answer shown in that slot
 
@@ -117,7 +124,34 @@ public class pressBombardment : minigameController
         _asked = _correct = _incorrect = 0;
         _readTime = startReadTime;
         _answerTime = startAnswerTime;
-        NextQuestion();
+        _tutorialActive = false;
+
+        if (tutorial && tutorialQuestion == null)
+            Debug.LogWarning("business: tutorial is on but no tutorial question is assigned, skipping it", this);
+
+        if (tutorial && tutorialQuestion != null)
+        {
+            _pool.Remove(tutorialQuestion);   // so it can't come up again in the real game
+            _tutorialActive = true;
+            LoadTutorialQuestion();
+        }
+        else NextQuestion();
+    }
+    
+    // Doesn't use the pool or count as a question, so it can be loaded again and again
+    private void LoadTutorialQuestion()
+    {
+        _current = tutorialQuestion;
+        BuildOrder();   // the answers are shuffled again each time
+
+        SetHover(-1);
+        HideAnswers();
+        SetBarVisible(false);
+        questionText.text = _current.questionText;
+
+        _phase = Phase.Reading;
+        _timer = startReadTime;
+        // ANIMATION: the tutorial question appears
     }
 
     private void CacheAnswerObjects()
@@ -187,14 +221,12 @@ public class pressBombardment : minigameController
             answerObjects[i].SetActive(has);
             if (has && _answerTexts[i] != null) _answerTexts[i].text = _current.answers[_order[i]].text;
         }
-
         _phase = Phase.Answering;
         _timer = _answerTime;
-        SetBarVisible(true);
-        SetTick(true);
-        UpdateBar();
+        SetBarVisible(!_tutorialActive);   // no timer in the tutorial
+        SetTick(!_tutorialActive);
+        if (!_tutorialActive) UpdateBar();
         SetHover(CurrentChoice());
-        // ANIMATION: the answers appear (slide in, fade in)
     }
 
     private void HideAnswers()
@@ -218,8 +250,9 @@ public class pressBombardment : minigameController
 
             case Phase.Answering:
                 SetHover(CurrentChoice());
-                UpdateBar();                         // _timer / _answerTime, only while answering
-                if (_timer <= 0f) Confirm(true);     // out of time: whatever is hovered is locked in
+                if (_tutorialActive) break;          // no time limit in the tutorial
+                UpdateBar();
+                if (_timer <= 0f) Confirm(true);
                 _tickSource.pitch = Mathf.Lerp(1.4f, 1f, _timer / _answerTime);
                 break;
 
@@ -257,21 +290,27 @@ public class pressBombardment : minigameController
     {
         int index = CurrentChoice();
         bool correct = index < _order.Length && _current.answers[_order[index]].isCorrect;
-        
+        _lastCorrect = correct;   // new
+
         if (correct) Play(correctSound, correctVolume);
         else Play(wrongSound, wrongVolume);
 
-        if (!correct)
+        if (!correct && !_tutorialActive)   // changed: mistakes in the tutorial cost nothing
         {
             AssignmentManager.Instance.Worsen("Marketing");
             _perfect = false;
         }
         ShowBackground(correct);
-        Debug.Log($"Question {_asked}/{questionCount}: {(correct ? "CORRECT" : "INCORRECT")} (chose {OptionNames[index]}{(timedOut ? ", time ran out" : "")})");
 
-        // The next question is a little harder
-        _readTime = Mathf.Max(minReadTime, _readTime - readTimeStep);
-        _answerTime = Mathf.Max(minAnswerTime, _answerTime - answerTimeStep);
+        string label = _tutorialActive ? "Tutorial question" : $"Question {_asked}/{questionCount}";   // changed
+        Debug.Log($"{label}: {(correct ? "CORRECT" : "INCORRECT")} (chose {OptionNames[index]}{(timedOut ? ", time ran out" : "")})");
+
+        if (!_tutorialActive)   // changed: the tutorial doesn't make the real game harder
+        {
+            // The next question is a little harder
+            _readTime = Mathf.Max(minReadTime, _readTime - readTimeStep);
+            _answerTime = Mathf.Max(minAnswerTime, _answerTime - answerTimeStep);
+        }
 
         SetHover(-1);   // the hover tint gives way to the feedback colors
         SetBarVisible(false);
@@ -297,6 +336,13 @@ public class pressBombardment : minigameController
     private void EndFeedback()
     {
         for (int i = 0; i < answerObjects.Length; i++) SetAnswerColor(i, _baseColors[i]);
+
+        if (_tutorialActive)
+        {
+            if (_lastCorrect) _tutorialActive = false;   // falls through to the first real question
+            else { LoadTutorialQuestion(); return; }     // wrong: the same question again
+        }
+
         NextQuestion();
     }
 
