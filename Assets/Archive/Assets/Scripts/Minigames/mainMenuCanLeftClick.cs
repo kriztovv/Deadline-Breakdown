@@ -51,6 +51,7 @@ public class mainMenuCanLeftClick : MonoBehaviour
             case 0:
                 _tutState = 1;
                 menu.SetActive(false);
+                playHitbox.GetComponent<BoxCollider2D>().enabled = false;
                 tutText.SetActive(true);
                 StartCoroutine(Wait());
                 break;
