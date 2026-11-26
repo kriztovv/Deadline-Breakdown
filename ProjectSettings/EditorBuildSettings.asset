@@ -41,5 +41,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/geography.unity
     guid: fc94f5ec79a34fa309dd156fa65a8f65
+  - enabled: 1
+    path: Assets/Scenes/TestVisual.unity
+    guid: ad20ea2e8b2322e7c819afcf4ad9f2dc
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
