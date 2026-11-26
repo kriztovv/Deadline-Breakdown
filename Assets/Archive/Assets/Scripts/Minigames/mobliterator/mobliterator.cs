@@ -188,10 +188,6 @@ public class mobliterator : minigameController
 
         // a settled shot stays in the mass, so the next round clears it too (a popped one is already being destroyed)
         _spawned.Add(m.gameObject);
-
-        if (_ended) return;
-        if (_respawn != null) StopCoroutine(_respawn);
-        _respawn = StartCoroutine(RespawnRoutine());
     }
 
     private IEnumerator RespawnRoutine()
@@ -325,6 +321,8 @@ public class mobliterator : minigameController
     {
         if (!_running || _shot == null) return;
         _shot.Launch(AimDirection(), shotSpeed);   // ignored if it was already fired
+        if (_respawn != null) return;
+        _respawn = StartCoroutine(RespawnRoutine());
     }
 
     // Timer bar (same as investit)
